@@ -1,0 +1,28 @@
+.home-page {
+  text-align: center;
+  padding: 2rem;
+}
+
+.category-filters {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.category-button {
+  padding: 10px 15px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.category-button.selected {
+  background-color: #2196f3;
+  color: white;
+}
+
+.category-button:hover {
+  opacity: 0.8;
+}

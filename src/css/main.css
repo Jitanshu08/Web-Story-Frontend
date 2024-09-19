@@ -1,0 +1,97 @@
+/* Reset some default browser styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+/* Set default font size and background color */
+body {
+  font-size: 16px;
+  background-color: #f4f4f4;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Basic styling for anchor links */
+a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Basic button styling */
+button {
+  cursor: pointer;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Make images responsive by default */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Global link hover effect */
+a:hover {
+  color: #007bff;
+}
+
+/* Default container padding */
+.container {
+  padding: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Set defaults for lists */
+ul {
+  list-style-type: none;
+}
+
+/* Set minimum height for main content area */
+main {
+  min-height: calc(100vh - 60px); /* Adjust based on the height of your Navbar */
+  padding: 1rem;
+}
+
+/* Set default text alignment for headings */
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+/* Default layout for flex containers */
+.flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive media queries */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .container {
+    padding: 0.5rem;
+  }
+}
