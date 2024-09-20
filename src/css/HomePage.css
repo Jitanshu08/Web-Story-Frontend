@@ -4,7 +4,7 @@
 }
 
 .category-filters {
-  margin-top: 2rem;
+  margin-bottom: 2rem;
   display: flex;
   justify-content: center;
   gap: 1rem;
@@ -25,4 +25,47 @@
 
 .category-button:hover {
   opacity: 0.8;
+}
+
+.stories-sections {
+  margin-top: 2rem;
+}
+
+.story-section {
+  margin-bottom: 3rem;
+}
+
+.story-section h2 {
+  text-align: left;
+  margin-left: 1rem;
+  color: #333;
+}
+
+.stories-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.story-card {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 5px;
+  background-color: #fff;
+  box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
+}
+
+.see-more-button {
+  margin-top: 1rem;
+  padding: 10px 20px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.see-more-button:hover {
+  background-color: #1976d2;
 }

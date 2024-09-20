@@ -68,7 +68,7 @@ ul {
 
 /* Set minimum height for main content area */
 main {
-  min-height: calc(100vh - 60px); /* Adjust based on the height of your Navbar */
+  min-height: calc(100vh - 60px); 
   padding: 1rem;
 }
 
