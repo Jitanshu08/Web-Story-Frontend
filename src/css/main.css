@@ -85,6 +85,62 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
 }
 
+/* Darken everything, including the navbar and content, with a slight overlay effect */
+.darkened {
+  position: relative;
+}
+
+.darkened:before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4); /* Semi-transparent background for the darkening effect */
+  z-index: 50; /* Ensure it's layered correctly behind the popup but above the content */
+}/* Overlay for the popup (remains the same) */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4); /* Slightly darker for the popup itself */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.popup-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 101;
+}
+
+.close-button {
+  margin-top: 10px;
+  background-color: #f44336;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  opacity: 0.8;
+}
+/* Make the navbar also dark when the popup is active */
+.navbar {
+  z-index: 50; /* Ensures it remains under the popup */
+}
+
 /* Responsive media queries */
 @media (max-width: 768px) {
   body {

@@ -1,4 +1,4 @@
-.registration-popup-container {
+.login-popup-container {
   position: fixed;
   top: 0;
   left: 0;
@@ -10,7 +10,7 @@
   align-items: center;
 }
 
-.registration-popup-content {
+.login-popup-content {
   position: relative;
   background-color: white;
   padding: 40px 30px;
@@ -20,7 +20,7 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.registration-close-icon {
+.login-close-icon {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -28,48 +28,48 @@
   cursor: pointer;
 }
 
-.registration-popup-content h2 {
+.login-popup-content h2 {
   text-align: center;
   margin-bottom: 30px;
 }
 
-.registration-error-message {
+.login-error-message {
   color: red;
   text-align: center;
   margin-bottom: 10px;
 }
 
-.registration-label-field-container {
+.login-label-field-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   margin-bottom: 20px;
 }
 
-.registration-label-field-container label {
+.login-label-field-container label {
   font-size: 14px;
   margin-bottom: 5px;
 }
 
-.registration-label-field-container input {
+.login-label-field-container input {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
 
-.registration-password-container {
+.login-password-container {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.registration-password-container input {
+.login-password-container input {
   width: 100%;
   padding-right: 40px;
 }
 
-.registration-eye-icon {
+.login-eye-icon {
   position: absolute;
   right: 10px;
   top: 50%;
@@ -78,7 +78,7 @@
   cursor: pointer;
 }
 
-.registration-button {
+.login-button {
   width: 100%;
   padding: 12px;
   background-color: #2196f3;
@@ -90,10 +90,10 @@
   margin-top: 20px;
 }
 
-.registration-button:hover {
+.login-button:hover {
   background-color: #1976d2;
 }
 
-.registration-gap {
+.login-gap {
   margin: 20px 0;
 }

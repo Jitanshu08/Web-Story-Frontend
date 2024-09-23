@@ -1,0 +1,32 @@
+.bookmarks-page {
+    padding: 2rem;
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .bookmarks-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .bookmark-card {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 200px;
+    text-align: center;
+  }
+  
+  .bookmark-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .bookmark-card p {
+    color: #555;
+  }
+  
