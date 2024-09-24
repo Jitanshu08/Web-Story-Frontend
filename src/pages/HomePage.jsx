@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "../css/HomePage.css";
+import StoryDetailsPage from "./StoryDetailPage"; // Import the StoryDetailsPage component
 
 const HomePage = ({ isLoggedIn }) => {
   const [selectedCategories, setSelectedCategories] = useState(["All"]);
@@ -8,12 +9,11 @@ const HomePage = ({ isLoggedIn }) => {
   const [yourStories, setYourStories] = useState([]); // User's stories state
   const [visibleStories, setVisibleStories] = useState({});
   const [visibleYourStories, setVisibleYourStories] = useState(4); // Limit for Your Stories display
+  const [selectedStory, setSelectedStory] = useState(null); // State for selected story
 
   const categories = ["All", "Food", "Health and Fitness", "Travel", "Movie", "Education"];
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
     const fetchStories = async () => {
       try {
         const fetchedStories = {};
@@ -36,18 +36,24 @@ const HomePage = ({ isLoggedIn }) => {
     };
 
     const fetchUserStories = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const userStoriesResponse = await axios.get(
-            `${import.meta.env.VITE_API_BASE_URL}/api/stories/mystories`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
+      if (isLoggedIn) {
+        const token = localStorage.getItem("token");
+        if (token) {
+          try {
+            const userStoriesResponse = await axios.get(
+              `${import.meta.env.VITE_API_BASE_URL}/api/stories/mystories`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+            setYourStories(userStoriesResponse.data); // Ensure the backend returns the stories array in data
+          } catch (error) {
+            if (error.response && error.response.status === 404) {
+              setYourStories([]);
+            } else {
+              console.error("Error fetching user stories:", error);
             }
-          );
-          setYourStories(userStoriesResponse.data); // Ensure the backend returns the stories array in data
-        } catch (error) {
-          console.error("Error fetching user stories:", error);
+          }
         }
       }
     };
@@ -76,7 +82,7 @@ const HomePage = ({ isLoggedIn }) => {
   const handleSeeMore = (category) => {
     setVisibleStories((prev) => ({
       ...prev,
-      [category]: (stories[category]?.length || 4), // Update to show all stories for the category
+      [category]: stories[category]?.length || 4, // Update to show all stories for the category
     }));
   };
 
@@ -106,7 +112,11 @@ const HomePage = ({ isLoggedIn }) => {
           {yourStories.length > 0 ? (
             <div className="stories-list">
               {yourStories.slice(0, visibleYourStories).map((story) => (
-                <div key={story._id} className="story-card">
+                <div 
+                  key={story._id} 
+                  className="story-card" 
+                  onClick={() => setSelectedStory(story)} // Open the StoryDetailsPage when clicked
+                >
                   <h3>{story.title}</h3>
                   <p>Category: {story.category}</p>
                 </div>
@@ -118,7 +128,7 @@ const HomePage = ({ isLoggedIn }) => {
               )}
             </div>
           ) : (
-            <p>No stories available</p>
+            <p>No stories available</p> 
           )}
         </div>
       )}
@@ -136,7 +146,11 @@ const HomePage = ({ isLoggedIn }) => {
                       {stories[category]
                         ?.slice(0, visibleStories[category] || 4)
                         .map((story) => (
-                          <div key={story._id} className="story-card">
+                          <div 
+                            key={story._id} 
+                            className="story-card" 
+                            onClick={() => setSelectedStory(story)} // Open the StoryDetailsPage when clicked
+                          >
                             <h3>{story.title}</h3>
                             <p>Category: {story.category}</p>
                           </div>
@@ -160,7 +174,11 @@ const HomePage = ({ isLoggedIn }) => {
                     {stories[category]
                       ?.slice(0, visibleStories[category] || 4)
                       .map((story) => (
-                        <div key={story._id} className="story-card">
+                        <div 
+                          key={story._id} 
+                          className="story-card" 
+                          onClick={() => setSelectedStory(story)} // Open the StoryDetailsPage when clicked
+                        >
                           <h3>{story.title}</h3>
                           <p>Category: {story.category}</p>
                         </div>
@@ -177,6 +195,14 @@ const HomePage = ({ isLoggedIn }) => {
               </div>
             ))}
       </div>
+
+      {/* StoryDetailsPage Popup */}
+      {selectedStory && (
+        <StoryDetailsPage 
+          story={selectedStory} 
+          onClose={() => setSelectedStory(null)} // Close the popup
+        />
+      )}
     </div>
   );
 };

@@ -4,13 +4,10 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const Navbar = ({ toggleLogin, toggleRegister, loggedIn, handleLogout }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(loggedIn || false);
   const [username, setUsername] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false); // Add state for dropdown
 
   useEffect(() => {
-    setIsLoggedIn(loggedIn); // Update based on the loggedIn prop from App
-
     if (loggedIn) {
       const token = localStorage.getItem("token");
       if (token) {
@@ -23,13 +20,13 @@ const Navbar = ({ toggleLogin, toggleRegister, loggedIn, handleLogout }) => {
             setUsername(response.data.username); // Set the username from the response
           })
           .catch(() => {
-            setIsLoggedIn(false); // In case of error, mark as not logged in
+            setUsername(""); // Reset username on error
           });
       }
     } else {
       setUsername(""); // Reset the username if the user is logged out
     }
-  }, [loggedIn]); // Depend on loggedIn state to reflect changes
+  }, [loggedIn]); // Depend on loggedIn prop to fetch user info
 
   const handleLogoutClick = () => {
     handleLogout(); // Call the logout handler from App.jsx
@@ -44,7 +41,7 @@ const Navbar = ({ toggleLogin, toggleRegister, loggedIn, handleLogout }) => {
     <nav className="navbar">
       <h1>Story Platform</h1>
       <div className="navbar-buttons">
-        {isLoggedIn ? (
+        {loggedIn ? (
           <>
             <Link to="/bookmarks">
               <button className="navbar-button">Bookmarks</button>

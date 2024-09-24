@@ -4,14 +4,44 @@ import "../css/AddStoryPage.css"; // Import a CSS file for this page
 
 const AddStoryPage = () => {
   const [title, setTitle] = useState("");
-  const [slides, setSlides] = useState([{ url: "", category: "Food" }]); // At least one slide by default
+  const [slides, setSlides] = useState([{ content: "", category: "Food", type: "" }]); // Use "content" instead of "url"
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState(""); // To display a success message
+
+  // Known extensions and domains
+  const getFileTypeFromUrl = (url) => {
+    if (!url || (!url.startsWith('http') && !url.startsWith('www.'))) {
+      return 'unknown'; // Return 'unknown' for incomplete or invalid URLs
+    }
+
+    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".svg", ".webp"];
+    const videoExtensions = [".mp4", ".avi", ".mov", ".mkv", ".flv", ".webm"];
+    const videoDomains = ["youtube.com", "youtu.be", "vimeo.com"];
+
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname;
+
+      if (videoDomains.includes(hostname)) {
+        return "video";
+      }
+
+      if (imageExtensions.some(ext => url.endsWith(ext))) {
+        return "image";
+      } else if (videoExtensions.some(ext => url.endsWith(ext))) {
+        return "video";
+      } else {
+        return "unknown";
+      }
+    } catch (error) {
+      return "unknown"; // If URL is invalid, return 'unknown'
+    }
+  };
 
   // Add a slide, ensuring a maximum of 6 slides
   const handleAddSlide = () => {
     if (slides.length < 6) {
-      setSlides([...slides, { url: "", category: "Food" }]);
+      setSlides([...slides, { content: "", category: "Food", type: "" }]);
     } else {
       setError("You can only add up to 6 slides.");
     }
@@ -52,14 +82,27 @@ const AddStoryPage = () => {
 
       // Clear form and display success message on successful story submission
       setTitle("");
-      setSlides([{ url: "", category: "Food" }]);
+      setSlides([{ content: "", category: "Food", type: "" }]);
       setError(""); // Clear any existing errors
       setSuccessMessage("Story added successfully!"); // Display success message
-      console.log("Story added:", response.data);
     } catch (error) {
       setError("Failed to add story. Please try again.");
-      console.error("Error:", error);
     }
+  };
+
+  const handleContentChange = (e, index) => {
+    const updatedSlides = [...slides];
+    const content = e.target.value;
+    updatedSlides[index].content = content;
+
+    // Only detect the file type if the URL is valid
+    if (content.startsWith('http') || content.startsWith('www.')) {
+      updatedSlides[index].type = getFileTypeFromUrl(content);
+    } else {
+      updatedSlides[index].type = 'unknown'; // Set type to unknown if URL is incomplete
+    }
+
+    setSlides(updatedSlides);
   };
 
   return (
@@ -83,17 +126,14 @@ const AddStoryPage = () => {
 
         {slides.map((slide, index) => (
           <div key={index} className="slide-container">
-            <label>Slide URL</label>
+            <label>Slide Content (URL)</label>
             <input
               type="text"
-              value={slide.url}
-              onChange={(e) => {
-                const updatedSlides = [...slides];
-                updatedSlides[index].url = e.target.value;
-                setSlides(updatedSlides);
-              }}
+              value={slide.content}
+              onChange={(e) => handleContentChange(e, index)}
               required
             />
+            <p>Type: {slide.type}</p> {/* Display detected type */}
             <label>Category</label>
             <select
               value={slide.category}
