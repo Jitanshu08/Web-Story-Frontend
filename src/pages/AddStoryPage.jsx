@@ -1,17 +1,17 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
 import "../css/AddStoryPage.css"; // Import a CSS file for this page
 
 const AddStoryPage = () => {
   const [title, setTitle] = useState("");
-  const [slides, setSlides] = useState([{ content: "", category: "Food", type: "" }]); // Use "content" instead of "url"
+  const [slides, setSlides] = useState([{ content: "", description: "", category: "Food", type: "" }]);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // To display a success message
+  const [successMessage, setSuccessMessage] = useState("");
+  const videoRefs = useRef([]);
 
-  // Known extensions and domains
   const getFileTypeFromUrl = (url) => {
     if (!url || (!url.startsWith('http') && !url.startsWith('www.'))) {
-      return 'unknown'; // Return 'unknown' for incomplete or invalid URLs
+      return 'unknown';
     }
 
     const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".svg", ".webp"];
@@ -34,20 +34,18 @@ const AddStoryPage = () => {
         return "unknown";
       }
     } catch (error) {
-      return "unknown"; // If URL is invalid, return 'unknown'
+      return "unknown";
     }
   };
 
-  // Add a slide, ensuring a maximum of 6 slides
   const handleAddSlide = () => {
     if (slides.length < 6) {
-      setSlides([...slides, { content: "", category: "Food", type: "" }]);
+      setSlides([...slides, { content: "", description: "", category: "Food", type: "" }]);
     } else {
       setError("You can only add up to 6 slides.");
     }
   };
 
-  // Remove a slide, ensuring at least 3 slides remain
   const handleRemoveSlide = (index) => {
     if (slides.length > 3) {
       const updatedSlides = slides.filter((_, i) => i !== index);
@@ -57,12 +55,18 @@ const AddStoryPage = () => {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
 
-    // Ensure the user provides a valid number of slides
+    // Check if any video duration exceeds 30 seconds
+    for (const ref of videoRefs.current) {
+      if (ref && ref.duration > 30) {
+        setError(`Slide ${videoRefs.current.indexOf(ref) + 1} has a video longer than 30 seconds.`);
+        return;
+      }
+    }
+
     if (slides.length < 3 || slides.length > 6) {
       setError("A story must have between 3 and 6 slides.");
       return;
@@ -70,21 +74,15 @@ const AddStoryPage = () => {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/stories/add`, // Adjust the endpoint
-        {
-          title,
-          slides,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        `${import.meta.env.VITE_API_BASE_URL}/api/stories/add`,
+        { title, slides },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Clear form and display success message on successful story submission
       setTitle("");
-      setSlides([{ content: "", category: "Food", type: "" }]);
-      setError(""); // Clear any existing errors
-      setSuccessMessage("Story added successfully!"); // Display success message
+      setSlides([{ content: "", description: "", category: "Food", type: "" }]);
+      setError("");
+      setSuccessMessage("Story added successfully!");
     } catch (error) {
       setError("Failed to add story. Please try again.");
     }
@@ -95,21 +93,31 @@ const AddStoryPage = () => {
     const content = e.target.value;
     updatedSlides[index].content = content;
 
-    // Only detect the file type if the URL is valid
     if (content.startsWith('http') || content.startsWith('www.')) {
       updatedSlides[index].type = getFileTypeFromUrl(content);
     } else {
-      updatedSlides[index].type = 'unknown'; // Set type to unknown if URL is incomplete
+      updatedSlides[index].type = 'unknown';
     }
 
     setSlides(updatedSlides);
+  };
+
+  const handleDescriptionChange = (e, index) => {
+    const updatedSlides = [...slides];
+    updatedSlides[index].description = e.target.value;
+    setSlides(updatedSlides);
+  };
+
+  const handleMetadataLoad = (index, event) => {
+    if (event.target.duration > 30) {
+      setError(`Slide ${index + 1} has a video longer than 30 seconds.`);
+    }
   };
 
   return (
     <div className="add-story-page">
       <h2>Add New Story</h2>
 
-      {/* Display error or success message */}
       {error && <p className="error-message">{error}</p>}
       {successMessage && <p className="success-message">{successMessage}</p>}
 
@@ -133,7 +141,17 @@ const AddStoryPage = () => {
               onChange={(e) => handleContentChange(e, index)}
               required
             />
-            <p>Type: {slide.type}</p> {/* Display detected type */}
+            <p>Type: {slide.type}</p>
+
+            <label>Description</label>
+            <input
+              type="text"
+              value={slide.description}
+              onChange={(e) => handleDescriptionChange(e, index)}
+              placeholder="Enter slide description"
+              required
+            />
+
             <label>Category</label>
             <select
               value={slide.category}
@@ -149,17 +167,21 @@ const AddStoryPage = () => {
               <option value="Movie">Movie</option>
               <option value="Education">Education</option>
             </select>
-            <button type="button" onClick={() => handleRemoveSlide(index)}>
-              Remove Slide
-            </button>
+
+            {slide.type === 'video' && (
+              <video
+                ref={(el) => (videoRefs.current[index] = el)}
+                src={slide.content}
+                onLoadedMetadata={(e) => handleMetadataLoad(index, e)}
+                style={{ display: 'none' }}
+              />
+            )}
+
+            <button type="button" onClick={() => handleRemoveSlide(index)}>Remove Slide</button>
           </div>
         ))}
 
-        <button
-          type="button"
-          onClick={handleAddSlide}
-          disabled={slides.length >= 6} // Disable when max slides reached
-        >
+        <button type="button" onClick={handleAddSlide} disabled={slides.length >= 6}>
           Add Slide
         </button>
 

@@ -1,15 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "../css/HomePage.css";
 import StoryDetailsPage from "./StoryDetailPage"; // Import the StoryDetailsPage component
 
 const HomePage = ({ isLoggedIn }) => {
   const [selectedCategories, setSelectedCategories] = useState(["All"]);
   const [stories, setStories] = useState({});
-  const [yourStories, setYourStories] = useState([]); // User's stories state
+  const [yourStories, setYourStories] = useState([]);
   const [visibleStories, setVisibleStories] = useState({});
-  const [visibleYourStories, setVisibleYourStories] = useState(4); // Limit for Your Stories display
-  const [selectedStory, setSelectedStory] = useState(null); // State for selected story
+  const [visibleYourStories, setVisibleYourStories] = useState(4);
+  const [selectedStory, setSelectedStory] = useState(null); // State for selected story (for modal)
+  const videoRefs = useRef({});
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const categories = ["All", "Food", "Health and Fitness", "Travel", "Movie", "Education"];
 
@@ -19,17 +22,16 @@ const HomePage = ({ isLoggedIn }) => {
         const fetchedStories = {};
         const initialVisibleStories = {};
 
-        // Fetch stories for each category
         for (const category of categories.filter((cat) => cat !== "All")) {
           const response = await axios.get(
             `${import.meta.env.VITE_API_BASE_URL}/api/stories/category/${category}`
           );
-          fetchedStories[category] = response.data; // Ensure the backend returns stories in the data field
-          initialVisibleStories[category] = 4; // Initialize with 4 visible stories
+          fetchedStories[category] = response.data;
+          initialVisibleStories[category] = 4;
         }
 
         setStories(fetchedStories);
-        setVisibleStories(initialVisibleStories); // Set the visibleStories state with 4 stories per category
+        setVisibleStories(initialVisibleStories);
       } catch (error) {
         console.error("Error fetching stories:", error);
       }
@@ -46,7 +48,7 @@ const HomePage = ({ isLoggedIn }) => {
                 headers: { Authorization: `Bearer ${token}` },
               }
             );
-            setYourStories(userStoriesResponse.data); // Ensure the backend returns the stories array in data
+            setYourStories(userStoriesResponse.data);
           } catch (error) {
             if (error.response && error.response.status === 404) {
               setYourStories([]);
@@ -61,11 +63,11 @@ const HomePage = ({ isLoggedIn }) => {
     fetchStories();
 
     if (isLoggedIn) {
-      fetchUserStories(); // Re-fetch user stories when login state changes
+      fetchUserStories();
     } else {
-      setYourStories([]); // Reset user stories when logged out
+      setYourStories([]);
     }
-  }, [isLoggedIn]); // Dependency on isLoggedIn
+  }, [isLoggedIn]);
 
   const toggleCategory = (category) => {
     if (category === "All") {
@@ -82,12 +84,35 @@ const HomePage = ({ isLoggedIn }) => {
   const handleSeeMore = (category) => {
     setVisibleStories((prev) => ({
       ...prev,
-      [category]: stories[category]?.length || 4, // Update to show all stories for the category
+      [category]: stories[category]?.length || 4,
     }));
   };
 
   const handleSeeMoreYourStories = () => {
-    setVisibleYourStories(yourStories.length); // Show all user stories
+    setVisibleYourStories(yourStories.length);
+  };
+
+  const isYouTubeVideo = (url) => {
+    return url.includes("youtube.com") || url.includes("youtu.be");
+  };
+
+  const getYouTubeEmbedUrl = (url) => {
+    if (url.includes("watch?v=")) {
+      return url.replace("watch?v=", "embed/");
+    } else if (url.includes("youtu.be/")) {
+      return url.replace("youtu.be/", "www.youtube.com/embed/");
+    }
+    return url;
+  };
+
+  const handleVideoTimeUpdate = (e) => {
+    if (e.target.currentTime >= 30) {
+      e.target.pause();
+    }
+  };
+
+  const handleEditStory = (storyId) => {
+    navigate(`/edit-story/${storyId}`); // Navigate to the Edit Story page
   };
 
   return (
@@ -112,13 +137,44 @@ const HomePage = ({ isLoggedIn }) => {
           {yourStories.length > 0 ? (
             <div className="stories-list">
               {yourStories.slice(0, visibleYourStories).map((story) => (
-                <div 
-                  key={story._id} 
-                  className="story-card" 
+                <div
+                  key={story._id}
+                  className="story-card"
                   onClick={() => setSelectedStory(story)} // Open the StoryDetailsPage when clicked
                 >
                   <h3>{story.title}</h3>
                   <p>Category: {story.category}</p>
+                  {/* Display the first slide preview */}
+                  {story.slides[0] &&
+                    (story.slides[0].type === "video" ? (
+                      isYouTubeVideo(story.slides[0].content) ? (
+                        <iframe
+                          width="200"
+                          height="150"
+                          src={getYouTubeEmbedUrl(story.slides[0].content)}
+                          title="YouTube video preview"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      ) : (
+                        <video
+                          width="200"
+                          controls
+                          ref={(el) => (videoRefs.current[story._id] = el)}
+                          onTimeUpdate={handleVideoTimeUpdate}
+                        >
+                          <source src={story.slides[0].content} type="video/mp4" />
+                        </video>
+                      )
+                    ) : (
+                      <img src={story.slides[0].content} alt="slide preview" width="200" />
+                    ))}
+
+                  {/* Edit button for user stories */}
+                  <button className="edit-button" onClick={() => handleEditStory(story._id)}>
+                    Edit
+                  </button>
                 </div>
               ))}
               {yourStories.length > 4 && visibleYourStories < yourStories.length && (
@@ -128,7 +184,7 @@ const HomePage = ({ isLoggedIn }) => {
               )}
             </div>
           ) : (
-            <p>No stories available</p> 
+            <p>No stories available</p>
           )}
         </div>
       )}
@@ -146,13 +202,38 @@ const HomePage = ({ isLoggedIn }) => {
                       {stories[category]
                         ?.slice(0, visibleStories[category] || 4)
                         .map((story) => (
-                          <div 
-                            key={story._id} 
-                            className="story-card" 
+                          <div
+                            key={story._id}
+                            className="story-card"
                             onClick={() => setSelectedStory(story)} // Open the StoryDetailsPage when clicked
                           >
                             <h3>{story.title}</h3>
                             <p>Category: {story.category}</p>
+                            {story.slides[0] &&
+                              (story.slides[0].type === "video" ? (
+                                isYouTubeVideo(story.slides[0].content) ? (
+                                  <iframe
+                                    width="200"
+                                    height="150"
+                                    src={getYouTubeEmbedUrl(story.slides[0].content)}
+                                    title="YouTube video preview"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                  ></iframe>
+                                ) : (
+                                  <video
+                                    width="200"
+                                    controls
+                                    ref={(el) => (videoRefs.current[story._id] = el)}
+                                    onTimeUpdate={handleVideoTimeUpdate}
+                                  >
+                                    <source src={story.slides[0].content} type="video/mp4" />
+                                  </video>
+                                )
+                              ) : (
+                                <img src={story.slides[0].content} alt="slide preview" width="200" />
+                              ))}
                           </div>
                         ))}
                       {stories[category]?.length > 4 && visibleStories[category] < stories[category].length && (
@@ -174,13 +255,38 @@ const HomePage = ({ isLoggedIn }) => {
                     {stories[category]
                       ?.slice(0, visibleStories[category] || 4)
                       .map((story) => (
-                        <div 
-                          key={story._id} 
-                          className="story-card" 
+                        <div
+                          key={story._id}
+                          className="story-card"
                           onClick={() => setSelectedStory(story)} // Open the StoryDetailsPage when clicked
                         >
                           <h3>{story.title}</h3>
                           <p>Category: {story.category}</p>
+                          {story.slides[0] &&
+                            (story.slides[0].type === "video" ? (
+                              isYouTubeVideo(story.slides[0].content) ? (
+                                <iframe
+                                  width="200"
+                                  height="150"
+                                  src={getYouTubeEmbedUrl(story.slides[0].content)}
+                                  title="YouTube video preview"
+                                  frameBorder="0"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                ></iframe>
+                              ) : (
+                                <video
+                                  width="200"
+                                  controls
+                                  ref={(el) => (videoRefs.current[story._id] = el)}
+                                  onTimeUpdate={handleVideoTimeUpdate}
+                                >
+                                  <source src={story.slides[0].content} type="video/mp4" />
+                                </video>
+                              )
+                            ) : (
+                              <img src={story.slides[0].content} alt="slide preview" width="200" />
+                            ))}
                         </div>
                       ))}
                     {stories[category]?.length > 4 && visibleStories[category] < stories[category].length && (
@@ -198,10 +304,7 @@ const HomePage = ({ isLoggedIn }) => {
 
       {/* StoryDetailsPage Popup */}
       {selectedStory && (
-        <StoryDetailsPage 
-          story={selectedStory} 
-          onClose={() => setSelectedStory(null)} // Close the popup
-        />
+        <StoryDetailsPage story={selectedStory} onClose={() => setSelectedStory(null)} />
       )}
     </div>
   );

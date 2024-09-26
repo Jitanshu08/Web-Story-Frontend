@@ -6,6 +6,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AddStoryPage from "./pages/AddStoryPage"; // Import Add Story Page
 import BookmarksPage from "./pages/BookmarksPage"; // Import Bookmarks Page
+import EditStoryPage from "./pages/EditStoryPage"
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
@@ -55,6 +56,7 @@ function App() {
           <Route path="/" element={<HomePage isLoggedIn={isLoggedIn} />} />
           <Route path="/add-story" element={isLoggedIn ? <AddStoryPage /> : <HomePage />} /> {/* Route for Add Story */}
           <Route path="/bookmarks" element={isLoggedIn ? <BookmarksPage /> : <HomePage />} /> {/* Route for Bookmarks */}
+          <Route path="/edit-story/:id" element={isLoggedIn ? <EditStoryPage /> : <HomePage />} />
         </Routes>
       </div>
 
