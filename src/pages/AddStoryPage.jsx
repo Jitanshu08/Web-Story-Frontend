@@ -1,22 +1,24 @@
 import { useState, useRef } from "react";
 import axios from "axios";
-import "../css/AddStoryPage.css"; // Import a CSS file for this page
+import "../css/AddStoryPage.css";
 
-const AddStoryPage = () => {
+const AddStoryPage = ({ closePopup }) => {
   const [title, setTitle] = useState("");
-  const [slides, setSlides] = useState([{ content: "", description: "", category: "Food", type: "" }]);
+  const [slides, setSlides] = useState([
+    { content: "", description: "", category: "Food", type: "" },
+  ]);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const videoRefs = useRef([]);
 
   const getFileTypeFromUrl = (url) => {
-    if (!url || (!url.startsWith('http') && !url.startsWith('www.'))) {
-      return 'unknown';
+    if (!url || (!url.startsWith("http") && !url.startsWith("www."))) {
+      return "unknown";
     }
 
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".svg", ".webp"];
-    const videoExtensions = [".mp4", ".avi", ".mov", ".mkv", ".flv", ".webm"];
-    const videoDomains = ["youtube.com", "youtu.be", "vimeo.com"];
+    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+    const videoExtensions = [".mp4", ".avi", ".mov"];
+    const videoDomains = ["youtube.com", "youtu.be"];
 
     try {
       const urlObj = new URL(url);
@@ -26,9 +28,9 @@ const AddStoryPage = () => {
         return "video";
       }
 
-      if (imageExtensions.some(ext => url.endsWith(ext))) {
+      if (imageExtensions.some((ext) => url.endsWith(ext))) {
         return "image";
-      } else if (videoExtensions.some(ext => url.endsWith(ext))) {
+      } else if (videoExtensions.some((ext) => url.endsWith(ext))) {
         return "video";
       } else {
         return "unknown";
@@ -40,7 +42,10 @@ const AddStoryPage = () => {
 
   const handleAddSlide = () => {
     if (slides.length < 6) {
-      setSlides([...slides, { content: "", description: "", category: "Food", type: "" }]);
+      setSlides([
+        ...slides,
+        { content: "", description: "", category: "Food", type: "" },
+      ]);
     } else {
       setError("You can only add up to 6 slides.");
     }
@@ -62,7 +67,11 @@ const AddStoryPage = () => {
     // Check if any video duration exceeds 30 seconds
     for (const ref of videoRefs.current) {
       if (ref && ref.duration > 30) {
-        setError(`Slide ${videoRefs.current.indexOf(ref) + 1} has a video longer than 30 seconds.`);
+        setError(
+          `Slide ${
+            videoRefs.current.indexOf(ref) + 1
+          } has a video longer than 30 seconds.`
+        );
         return;
       }
     }
@@ -93,10 +102,10 @@ const AddStoryPage = () => {
     const content = e.target.value;
     updatedSlides[index].content = content;
 
-    if (content.startsWith('http') || content.startsWith('www.')) {
+    if (content.startsWith("http") || content.startsWith("www.")) {
       updatedSlides[index].type = getFileTypeFromUrl(content);
     } else {
-      updatedSlides[index].type = 'unknown';
+      updatedSlides[index].type = "unknown";
     }
 
     setSlides(updatedSlides);
@@ -115,7 +124,10 @@ const AddStoryPage = () => {
   };
 
   return (
-    <div className="add-story-page">
+    <div className="add-story-popup">
+      <button className="close-button" onClick={closePopup}>
+        X
+      </button>
       <h2>Add New Story</h2>
 
       {error && <p className="error-message">{error}</p>}
@@ -148,7 +160,6 @@ const AddStoryPage = () => {
               type="text"
               value={slide.description}
               onChange={(e) => handleDescriptionChange(e, index)}
-              placeholder="Enter slide description"
               required
             />
 
@@ -168,20 +179,26 @@ const AddStoryPage = () => {
               <option value="Education">Education</option>
             </select>
 
-            {slide.type === 'video' && (
+            {slide.type === "video" && (
               <video
                 ref={(el) => (videoRefs.current[index] = el)}
                 src={slide.content}
                 onLoadedMetadata={(e) => handleMetadataLoad(index, e)}
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
               />
             )}
 
-            <button type="button" onClick={() => handleRemoveSlide(index)}>Remove Slide</button>
+            <button type="button" onClick={() => handleRemoveSlide(index)}>
+              Remove Slide
+            </button>
           </div>
         ))}
 
-        <button type="button" onClick={handleAddSlide} disabled={slides.length >= 6}>
+        <button
+          type="button"
+          onClick={handleAddSlide}
+          disabled={slides.length >= 6}
+        >
           Add Slide
         </button>
 

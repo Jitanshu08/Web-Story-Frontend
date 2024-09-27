@@ -5,7 +5,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   font-family: Arial, sans-serif;
 }
@@ -13,7 +14,7 @@ html, body {
 /* Set default font size and background color */
 body {
   font-size: 16px;
-  background-color: #f4f4f4;
+  background-color: #ffffff;
   color: #333;
   line-height: 1.6;
 }
@@ -68,12 +69,17 @@ ul {
 
 /* Set minimum height for main content area */
 main {
-  min-height: calc(100vh - 60px); 
+  min-height: calc(100vh - 60px);
   padding: 1rem;
 }
 
 /* Set default text alignment for headings */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin-bottom: 1rem;
   color: #333;
 }
@@ -85,21 +91,6 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
 }
 
-/* Darken everything, including the navbar and content, with a slight overlay effect */
-.darkened {
-  position: relative;
-}
-
-.darkened:before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4); /* Semi-transparent background for the darkening effect */
-  z-index: 50; /* Ensure it's layered correctly behind the popup but above the content */
-}/* Overlay for the popup (remains the same) */
 .overlay {
   position: fixed;
   top: 0;
@@ -146,7 +137,7 @@ h1, h2, h3, h4, h5, h6 {
   body {
     font-size: 14px;
   }
-  
+
   .container {
     padding: 0.5rem;
   }

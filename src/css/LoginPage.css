@@ -41,9 +41,11 @@
 
 .login-label-field-container {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
   margin-bottom: 20px;
+  width: fit-content;
+  gap: 20px;
 }
 
 .login-label-field-container label {
@@ -62,11 +64,13 @@
   position: relative;
   display: flex;
   align-items: center;
+  margin-bottom: 0;
 }
 
 .login-password-container input {
   width: 100%;
-  padding-right: 40px;
+  /* padding-right: 40px; */
+  margin-bottom: 0;
 }
 
 .login-eye-icon {

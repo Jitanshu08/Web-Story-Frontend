@@ -4,6 +4,14 @@ import { useNavigate } from "react-router-dom";
 import "../css/HomePage.css";
 import StoryDetailsPage from "./StoryDetailPage"; // Import the StoryDetailsPage component
 
+// Import images for categories
+import allImage from "../assets/all.png";
+import foodImage from "../assets/Food.png";
+import healthImage from "../assets/medical.png";
+import travelImage from "../assets/travel.png";
+import movieImage from "../assets/world.png";
+import educationImage from "../assets/education.jpg";
+
 const HomePage = ({ isLoggedIn }) => {
   const [selectedCategories, setSelectedCategories] = useState(["All"]);
   const [stories, setStories] = useState({});
@@ -14,7 +22,14 @@ const HomePage = ({ isLoggedIn }) => {
   const videoRefs = useRef({});
   const navigate = useNavigate(); // Initialize useNavigate
 
-  const categories = ["All", "Food", "Health and Fitness", "Travel", "Movie", "Education"];
+  const categories = [
+    { name: "All", image: allImage },
+    { name: "Food", image: foodImage },
+    { name: "Health and Fitness", image: healthImage },
+    { name: "Travel", image: travelImage },
+    { name: "Movie", image: movieImage },
+    { name: "Education", image: educationImage },
+  ];
 
   useEffect(() => {
     const fetchStories = async () => {
@@ -22,12 +37,14 @@ const HomePage = ({ isLoggedIn }) => {
         const fetchedStories = {};
         const initialVisibleStories = {};
 
-        for (const category of categories.filter((cat) => cat !== "All")) {
+        for (const category of categories.filter((cat) => cat.name !== "All")) {
           const response = await axios.get(
-            `${import.meta.env.VITE_API_BASE_URL}/api/stories/category/${category}`
+            `${import.meta.env.VITE_API_BASE_URL}/api/stories/category/${
+              category.name
+            }`
           );
-          fetchedStories[category] = response.data;
-          initialVisibleStories[category] = 4;
+          fetchedStories[category.name] = response.data;
+          initialVisibleStories[category.name] = 4;
         }
 
         setStories(fetchedStories);
@@ -121,11 +138,18 @@ const HomePage = ({ isLoggedIn }) => {
       <div className="category-filters">
         {categories.map((category) => (
           <button
-            key={category}
-            className={`category-button ${selectedCategories.includes(category) ? "selected" : ""}`}
-            onClick={() => toggleCategory(category)}
+            key={category.name}
+            className={`category-button ${
+              selectedCategories.includes(category.name) ? "selected" : ""
+            }`}
+            onClick={() => toggleCategory(category.name)}
           >
-            {category}
+            <span>{category.name}</span>
+            <img
+              src={category.image}
+              alt={category.name}
+              className="category-image"
+            />
           </button>
         ))}
       </div>
@@ -164,24 +188,38 @@ const HomePage = ({ isLoggedIn }) => {
                           ref={(el) => (videoRefs.current[story._id] = el)}
                           onTimeUpdate={handleVideoTimeUpdate}
                         >
-                          <source src={story.slides[0].content} type="video/mp4" />
+                          <source
+                            src={story.slides[0].content}
+                            type="video/mp4"
+                          />
                         </video>
                       )
                     ) : (
-                      <img src={story.slides[0].content} alt="slide preview" width="200" />
+                      <img
+                        src={story.slides[0].content}
+                        alt="slide preview"
+                        width="200"
+                      />
                     ))}
 
                   {/* Edit button for user stories */}
-                  <button className="edit-button" onClick={() => handleEditStory(story._id)}>
+                  <button
+                    className="edit-button"
+                    onClick={() => handleEditStory(story._id)}
+                  >
                     Edit
                   </button>
                 </div>
               ))}
-              {yourStories.length > 4 && visibleYourStories < yourStories.length && (
-                <button className="see-more-button" onClick={handleSeeMoreYourStories}>
-                  See More
-                </button>
-              )}
+              {yourStories.length > 4 &&
+                visibleYourStories < yourStories.length && (
+                  <button
+                    className="see-more-button"
+                    onClick={handleSeeMoreYourStories}
+                  >
+                    See More
+                  </button>
+                )}
             </div>
           ) : (
             <p>No stories available</p>
@@ -193,14 +231,14 @@ const HomePage = ({ isLoggedIn }) => {
       <div className="stories-sections">
         {selectedCategories.includes("All")
           ? categories
-              .filter((cat) => cat !== "All")
+              .filter((cat) => cat.name !== "All")
               .map((category) => (
-                <div key={category} className="story-section">
-                  <h2>{category}</h2>
-                  {stories[category]?.length > 0 ? (
+                <div key={category.name} className="story-section">
+                  <h2>{category.name}</h2>
+                  {stories[category.name]?.length > 0 ? (
                     <div className="stories-list">
-                      {stories[category]
-                        ?.slice(0, visibleStories[category] || 4)
+                      {stories[category.name]
+                        ?.slice(0, visibleStories[category.name] || 4)
                         .map((story) => (
                           <div
                             key={story._id}
@@ -215,7 +253,9 @@ const HomePage = ({ isLoggedIn }) => {
                                   <iframe
                                     width="200"
                                     height="150"
-                                    src={getYouTubeEmbedUrl(story.slides[0].content)}
+                                    src={getYouTubeEmbedUrl(
+                                      story.slides[0].content
+                                    )}
                                     title="YouTube video preview"
                                     frameBorder="0"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -225,22 +265,36 @@ const HomePage = ({ isLoggedIn }) => {
                                   <video
                                     width="200"
                                     controls
-                                    ref={(el) => (videoRefs.current[story._id] = el)}
+                                    ref={(el) =>
+                                      (videoRefs.current[story._id] = el)
+                                    }
                                     onTimeUpdate={handleVideoTimeUpdate}
                                   >
-                                    <source src={story.slides[0].content} type="video/mp4" />
+                                    <source
+                                      src={story.slides[0].content}
+                                      type="video/mp4"
+                                    />
                                   </video>
                                 )
                               ) : (
-                                <img src={story.slides[0].content} alt="slide preview" width="200" />
+                                <img
+                                  src={story.slides[0].content}
+                                  alt="slide preview"
+                                  width="200"
+                                />
                               ))}
                           </div>
                         ))}
-                      {stories[category]?.length > 4 && visibleStories[category] < stories[category].length && (
-                        <button className="see-more-button" onClick={() => handleSeeMore(category)}>
-                          See More
-                        </button>
-                      )}
+                      {stories[category.name]?.length > 4 &&
+                        visibleStories[category.name] <
+                          stories[category.name].length && (
+                          <button
+                            className="see-more-button"
+                            onClick={() => handleSeeMore(category.name)}
+                          >
+                            See More
+                          </button>
+                        )}
                     </div>
                   ) : (
                     <p>No stories available</p>
@@ -268,7 +322,9 @@ const HomePage = ({ isLoggedIn }) => {
                                 <iframe
                                   width="200"
                                   height="150"
-                                  src={getYouTubeEmbedUrl(story.slides[0].content)}
+                                  src={getYouTubeEmbedUrl(
+                                    story.slides[0].content
+                                  )}
                                   title="YouTube video preview"
                                   frameBorder="0"
                                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -278,22 +334,35 @@ const HomePage = ({ isLoggedIn }) => {
                                 <video
                                   width="200"
                                   controls
-                                  ref={(el) => (videoRefs.current[story._id] = el)}
+                                  ref={(el) =>
+                                    (videoRefs.current[story._id] = el)
+                                  }
                                   onTimeUpdate={handleVideoTimeUpdate}
                                 >
-                                  <source src={story.slides[0].content} type="video/mp4" />
+                                  <source
+                                    src={story.slides[0].content}
+                                    type="video/mp4"
+                                  />
                                 </video>
                               )
                             ) : (
-                              <img src={story.slides[0].content} alt="slide preview" width="200" />
+                              <img
+                                src={story.slides[0].content}
+                                alt="slide preview"
+                                width="200"
+                              />
                             ))}
                         </div>
                       ))}
-                    {stories[category]?.length > 4 && visibleStories[category] < stories[category].length && (
-                      <button className="see-more-button" onClick={() => handleSeeMore(category)}>
-                        See More
-                      </button>
-                    )}
+                    {stories[category]?.length > 4 &&
+                      visibleStories[category] < stories[category].length && (
+                        <button
+                          className="see-more-button"
+                          onClick={() => handleSeeMore(category)}
+                        >
+                          See More
+                        </button>
+                      )}
                   </div>
                 ) : (
                   <p>No stories available</p>
@@ -304,7 +373,10 @@ const HomePage = ({ isLoggedIn }) => {
 
       {/* StoryDetailsPage Popup */}
       {selectedStory && (
-        <StoryDetailsPage story={selectedStory} onClose={() => setSelectedStory(null)} />
+        <StoryDetailsPage
+          story={selectedStory}
+          onClose={() => setSelectedStory(null)}
+        />
       )}
     </div>
   );

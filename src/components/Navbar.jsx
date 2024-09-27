@@ -1,11 +1,17 @@
 import { Link } from "react-router-dom";
-import "../css/Navbar.css"; // Navbar CSS
+import "../css/Navbar.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const Navbar = ({ toggleLogin, toggleRegister, loggedIn, handleLogout }) => {
-  const [username, setUsername] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState(false); // Add state for dropdown
+const Navbar = ({
+  toggleLogin,
+  toggleRegister,
+  toggleAddStory,
+  loggedIn,
+  handleLogout,
+}) => {
+  const [username, setUsername] = useState(null); // Default to null instead of empty string
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (loggedIn) {
@@ -20,17 +26,18 @@ const Navbar = ({ toggleLogin, toggleRegister, loggedIn, handleLogout }) => {
             setUsername(response.data.username); // Set the username from the response
           })
           .catch(() => {
-            setUsername(""); // Reset username on error
+            setUsername(null); // Reset username on error
           });
       }
     } else {
-      setUsername(""); // Reset the username if the user is logged out
+      setUsername(null); // Reset the username if the user is logged out
     }
-  }, [loggedIn]); // Depend on loggedIn prop to fetch user info
+  }, [loggedIn]);
 
   const handleLogoutClick = () => {
-    handleLogout(); // Call the logout handler from App.jsx
+    handleLogout();
     setDropdownOpen(false); // Close the dropdown on logout
+    setUsername(null); // Clear the username on logout
   };
 
   const toggleDropdown = () => {
@@ -41,20 +48,21 @@ const Navbar = ({ toggleLogin, toggleRegister, loggedIn, handleLogout }) => {
     <nav className="navbar">
       <h1>Story Platform</h1>
       <div className="navbar-buttons">
-        {loggedIn ? (
+        {loggedIn && username ? (
           <>
             <Link to="/bookmarks">
               <button className="navbar-button">Bookmarks</button>
             </Link>
-            <Link to="/add-story">
-              <button className="navbar-button">Add Story</button>
-            </Link>
+            <button className="navbar-button" onClick={toggleAddStory}>
+              Add Story
+            </button>
             <div className="user-menu">
               <button className="user-icon">
-                {username ? username[0].toUpperCase() : "U"} {/* Default to "U" if username is not available */}
+                {username[0].toUpperCase()}{" "}
+                {/* Show the first letter of the username */}
               </button>
               <button className="hamburger-icon" onClick={toggleDropdown}>
-                &#9776; {/* HTML symbol for three horizontal lines */}
+                &#9776;
               </button>
               {dropdownOpen && (
                 <div className="dropdown-content">
@@ -68,8 +76,12 @@ const Navbar = ({ toggleLogin, toggleRegister, loggedIn, handleLogout }) => {
           </>
         ) : (
           <>
-            <button className="navbar-button" onClick={toggleRegister}>Register</button>
-            <button className="navbar-button" onClick={toggleLogin}>Sign In</button>
+            <button className="navbar-button" onClick={toggleRegister}>
+              Register
+            </button>
+            <button className="navbar-button" onClick={toggleLogin}>
+              Sign In
+            </button>
           </>
         )}
       </div>

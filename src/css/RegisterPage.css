@@ -41,9 +41,10 @@
 
 .registration-label-field-container {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
   margin-bottom: 20px;
+  gap: 20px;
 }
 
 .registration-label-field-container label {
@@ -52,7 +53,7 @@
 }
 
 .registration-label-field-container input {
-  width: 100%;
+  width: fit-content;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -62,11 +63,12 @@
   position: relative;
   display: flex;
   align-items: center;
+  margin-bottom: 0;
 }
 
 .registration-password-container input {
   width: 100%;
-  padding-right: 40px;
+  /* padding-right: 40px; */
 }
 
 .registration-eye-icon {

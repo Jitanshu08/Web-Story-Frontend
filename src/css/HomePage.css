@@ -1,33 +1,63 @@
 .home-page {
   text-align: center;
   padding: 2rem;
-  margin-top: 70px; 
+  margin-top: 70px;
 }
 
+/* Make category filters horizontally scrollable */
 .category-filters {
   margin-bottom: 2rem;
   display: flex;
-  justify-content: center;
-  gap: 1rem;
+  gap: 10px;
+  overflow: auto;
+  padding: 10px;
+  scrollbar-width: thin; /* For Firefox */
 }
 
 .category-button {
-  padding: 10px 15px;
-  border: 2px solid #ddd;
-  border-radius: 5px;
+  position: relative;
+  border: solid;
+  border-radius: 36px;
   cursor: pointer;
-  background-color: white;
+  background-color: transparent;
+  width: 235px;
+  height: 235px;
+  overflow: hidden; /* Ensures the image won't break the button shape */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 .category-button.selected {
-  background-color: #2196f3;
+  border-color: #2196f3;
+}
+
+.category-image {
+  width: 130%; /* Overflow the image beyond the button */
+  height: 130%; /* Make the image larger than the button */
+  object-fit: cover;
+  display: block;
+}
+
+.category-button span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: bold;
   color: white;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7); /* Add shadow for text clarity */
+  z-index: 1;
 }
 
 .category-button:hover {
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
+/* Other styles remain unchanged */
 .stories-sections {
   margin-top: 2rem;
 }
