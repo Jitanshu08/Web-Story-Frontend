@@ -7,6 +7,7 @@ import RegisterPage from "./pages/RegisterPage";
 import AddStoryPage from "./pages/AddStoryPage"; // Import Add Story Page
 import BookmarksPage from "./pages/BookmarksPage"; // Import Bookmarks Page
 import EditStoryPage from "./pages/EditStoryPage";
+import YourStoriesPage from "./components/YourStoriesPage";
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
@@ -80,6 +81,7 @@ function App() {
           path="/edit-story/:id"
           element={isLoggedIn ? <EditStoryPage /> : <HomePage />}
         />
+        <Route path="/your-stories" element={<YourStoriesPage isLoggedIn={isLoggedIn} />} />
       </Routes>
 
       {/* Conditionally show the Login Popup */}

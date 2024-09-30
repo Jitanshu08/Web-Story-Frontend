@@ -4,16 +4,26 @@
   margin-top: 70px;
 }
 
-/* Make category filters horizontally scrollable */
 .category-filters {
   margin-bottom: 2rem;
   display: flex;
   gap: 10px;
-  overflow: auto;
+  overflow-x: auto; /* Ensure horizontal scrolling */
   padding: 10px;
   scrollbar-width: thin; /* For Firefox */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling for mobile devices */
 }
 
+.category-filters::-webkit-scrollbar {
+  height: 6px; /* Height for horizontal scrollbar */
+}
+
+.category-filters::-webkit-scrollbar-thumb {
+  background-color: #cccccc; /* Custom scrollbar color */
+  border-radius: 10px;
+}
+
+/* Make sure the category buttons do not cause overflow issues */
 .category-button {
   position: relative;
   border: solid;
@@ -22,12 +32,12 @@
   background-color: transparent;
   width: 235px;
   height: 235px;
-  overflow: hidden; /* Ensures the image won't break the button shape */
+  overflow: hidden; /* Ensure the image won't break the button shape */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Prevent shrinking of the category buttons */
 }
 
 .category-button.selected {
@@ -57,52 +67,167 @@
   opacity: 0.9;
 }
 
-/* Other styles remain unchanged */
+
+/* Stories sections */
 .stories-sections {
   margin-top: 2rem;
 }
 
+/* Individual story section */
 .story-section {
   margin-bottom: 3rem;
+  position: relative; /* Added position relative to allow better control over placement */
+  padding-bottom: 3rem; /* Add padding at the bottom to ensure space for See More button */
 }
 
+/* Center the headings */
 .story-section h2 {
-  text-align: left;
-  margin-left: 1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
   color: #333;
+  font-size: 1.75rem;
 }
 
+/* Center stories within each section */
 .stories-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+  gap: 2rem;
+  justify-content: center; /* Center align story cards */
   padding: 1rem;
+  max-width: 1200px; /* Set a max width to keep the grid from expanding too much */
+  margin: 0 auto; /* Center the grid within its container */
 }
 
+/* Story card styling */
 .story-card {
-  border: 1px solid #ddd;
+  border: none;
   padding: 1rem;
-  border-radius: 5px;
-  background-color: #fff;
+  border-radius: 10px;
+  background-color: black; /* Match background with the Story Detail Page */
+  color: white;
   box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
+  width: 257px;
+  height: 459px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  padding-bottom: 50px; /* Create space for Edit button */
 }
 
+.story-card h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.story-card p {
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.4;
+  margin-bottom: auto; /* Push description up to leave space for the button */
+  color: rgba(255, 255, 255, 0.8); /* Slight transparency */
+}
+
+/* Video/Image styles */
+.story-card img, .story-card video, .story-card iframe {
+  width: 100%;
+  object-fit: contain;
+  height: auto; /* Let the height be automatic based on content */
+}
+
+/* Edit button styling */
+.edit-button {
+  position: absolute;
+  bottom: -17px; /* Half of the button height will be out of the card */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 79px;
+  height: 34px;
+  background-color: white;
+  color: black;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.edit-button img {
+  width: 16px; /* Size of the icon */
+  margin-right: 5px; /* Add space between icon and text */
+}
+
+/* See More button container for Your Stories */
+.user-stories-section {
+  position: relative;
+  padding-bottom: 4rem; /* Ensure space at the bottom for the See More button */
+}
+
+.user-stories-section .see-more-container {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0; /* Ensure it is placed at the bottom of the section */
+  margin-bottom: 1rem; /* Adjust the margin to create space between button and bottom */
+}
+
+/* Keep other section's See More button placement unchanged */
+.story-section .see-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* See More button styling */
 .see-more-button {
-  margin-top: 1rem;
-  padding: 10px 20px;
-  background-color: #2196f3;
+  width: 136px;
+  height: 45px;
+  background-color: rgba(255, 115, 115, 1);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 20px;
   cursor: pointer;
 }
 
 .see-more-button:hover {
-  background-color: #1976d2;
+  background-color: rgba(255, 95, 95, 1); /* Slightly darker on hover */
 }
 
 .loading-indicator {
   font-size: 1.5rem;
   text-align: center;
   padding: 2rem;
+}
+
+.home-story-text-overlay{
+  text-align: left;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  .category-button {
+    width: 142.6px;
+    height: 95.15px;
+    border-radius: 15px;
+  }
+
+  .category-button span {
+    font-size: 1.2rem; /* Adjust font size for smaller button */
+  }
+
+  .category-image {
+    width: 110%; /* Slightly smaller image to fit the button */
+    height: 110%; /* Adjust image size */
+  }
 }

@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../css/HomePage.css";
-import StoryDetailsPage from "./StoryDetailPage"; // Import the StoryDetailsPage component
+import StoryDetailsPage from "./StoryDetailPage";
 
 // Import images for categories
 import allImage from "../assets/all.png";
@@ -11,6 +11,7 @@ import healthImage from "../assets/medical.png";
 import travelImage from "../assets/travel.png";
 import movieImage from "../assets/world.png";
 import educationImage from "../assets/education.jpg";
+import EditIcon from "../assets/edit.png";
 
 const HomePage = ({ isLoggedIn }) => {
   const [selectedCategories, setSelectedCategories] = useState(["All"]);
@@ -18,9 +19,19 @@ const HomePage = ({ isLoggedIn }) => {
   const [yourStories, setYourStories] = useState([]);
   const [visibleStories, setVisibleStories] = useState({});
   const [visibleYourStories, setVisibleYourStories] = useState(4);
-  const [selectedStory, setSelectedStory] = useState(null); // State for selected story (for modal)
+  const [selectedStory, setSelectedStory] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const videoRefs = useRef({});
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
+
+  // Handle window resize to detect mobile screen
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const categories = [
     { name: "All", image: allImage },
@@ -74,15 +85,14 @@ const HomePage = ({ isLoggedIn }) => {
             }
           }
         }
+      } else {
+        setYourStories([]);
       }
     };
 
     fetchStories();
-
     if (isLoggedIn) {
       fetchUserStories();
-    } else {
-      setYourStories([]);
     }
   }, [isLoggedIn]);
 
@@ -128,13 +138,17 @@ const HomePage = ({ isLoggedIn }) => {
     }
   };
 
+  const truncateText = (text, maxWords) => {
+    if (!text) return "";
+    return text.split(" ").slice(0, maxWords).join(" ") + "...";
+  };
+
   const handleEditStory = (storyId) => {
-    navigate(`/edit-story/${storyId}`); // Navigate to the Edit Story page
+    navigate(`/edit-story/${storyId}`);
   };
 
   return (
     <div className="home-page">
-      {/* Category filter buttons */}
       <div className="category-filters">
         {categories.map((category) => (
           <button
@@ -154,8 +168,7 @@ const HomePage = ({ isLoggedIn }) => {
         ))}
       </div>
 
-      {/* Show Your Stories section if logged in */}
-      {isLoggedIn && (
+      {isLoggedIn && !isMobile &&(
         <div className="user-stories-section">
           <h2>Your Stories</h2>
           {yourStories.length > 0 ? (
@@ -164,17 +177,14 @@ const HomePage = ({ isLoggedIn }) => {
                 <div
                   key={story._id}
                   className="story-card"
-                  onClick={() => setSelectedStory(story)} // Open the StoryDetailsPage when clicked
+                  onClick={() => setSelectedStory(story)}
                 >
-                  <h3>{story.title}</h3>
-                  <p>Category: {story.category}</p>
-                  {/* Display the first slide preview */}
                   {story.slides[0] &&
                     (story.slides[0].type === "video" ? (
                       isYouTubeVideo(story.slides[0].content) ? (
                         <iframe
-                          width="200"
-                          height="150"
+                          width="100%"
+                          height="200px"
                           src={getYouTubeEmbedUrl(story.slides[0].content)}
                           title="YouTube video preview"
                           frameBorder="0"
@@ -183,7 +193,8 @@ const HomePage = ({ isLoggedIn }) => {
                         ></iframe>
                       ) : (
                         <video
-                          width="200"
+                          width="100%"
+                          height="200px"
                           controls
                           ref={(el) => (videoRefs.current[story._id] = el)}
                           onTimeUpdate={handleVideoTimeUpdate}
@@ -198,27 +209,43 @@ const HomePage = ({ isLoggedIn }) => {
                       <img
                         src={story.slides[0].content}
                         alt="slide preview"
-                        width="200"
+                        width="100%"
+                        height="200px"
                       />
                     ))}
 
-                  {/* Edit button for user stories */}
+                  <div className="home-story-text-overlay">
+                    {story.slides[0].heading && (
+                      <h3>{story.slides[0].heading}</h3>
+                    )}
+                    {story.slides[0].description && (
+                      <p>{truncateText(story.slides[0].description, 8)}</p>
+                    )}
+                  </div>
+
                   <button
                     className="edit-button"
                     onClick={() => handleEditStory(story._id)}
                   >
+                    <img
+                      className="edit-button-icon"
+                      src={EditIcon}
+                      alt="Edit"
+                    />
                     Edit
                   </button>
                 </div>
               ))}
               {yourStories.length > 4 &&
                 visibleYourStories < yourStories.length && (
-                  <button
-                    className="see-more-button"
-                    onClick={handleSeeMoreYourStories}
-                  >
-                    See More
-                  </button>
+                  <div className="see-more-container">
+                    <button
+                      className="see-more-button"
+                      onClick={handleSeeMoreYourStories}
+                    >
+                      See More
+                    </button>
+                  </div>
                 )}
             </div>
           ) : (
@@ -227,14 +254,13 @@ const HomePage = ({ isLoggedIn }) => {
         </div>
       )}
 
-      {/* Story sections */}
       <div className="stories-sections">
         {selectedCategories.includes("All")
           ? categories
               .filter((cat) => cat.name !== "All")
               .map((category) => (
                 <div key={category.name} className="story-section">
-                  <h2>{category.name}</h2>
+                  <h2>Top Stories About {category.name}</h2>
                   {stories[category.name]?.length > 0 ? (
                     <div className="stories-list">
                       {stories[category.name]
@@ -243,16 +269,14 @@ const HomePage = ({ isLoggedIn }) => {
                           <div
                             key={story._id}
                             className="story-card"
-                            onClick={() => setSelectedStory(story)} // Open the StoryDetailsPage when clicked
+                            onClick={() => setSelectedStory(story)}
                           >
-                            <h3>{story.title}</h3>
-                            <p>Category: {story.category}</p>
                             {story.slides[0] &&
                               (story.slides[0].type === "video" ? (
                                 isYouTubeVideo(story.slides[0].content) ? (
                                   <iframe
-                                    width="200"
-                                    height="150"
+                                    width="100%"
+                                    height="200px"
                                     src={getYouTubeEmbedUrl(
                                       story.slides[0].content
                                     )}
@@ -263,7 +287,8 @@ const HomePage = ({ isLoggedIn }) => {
                                   ></iframe>
                                 ) : (
                                   <video
-                                    width="200"
+                                    width="100%"
+                                    height="200px"
                                     controls
                                     ref={(el) =>
                                       (videoRefs.current[story._id] = el)
@@ -280,20 +305,37 @@ const HomePage = ({ isLoggedIn }) => {
                                 <img
                                   src={story.slides[0].content}
                                   alt="slide preview"
-                                  width="200"
+                                  width="100%"
+                                  height="200px"
                                 />
                               ))}
+
+                            <div className="home-story-text-overlay">
+                              {story.slides[0].heading && (
+                                <h3>{story.slides[0].heading}</h3>
+                              )}
+                              {story.slides[0].description && (
+                                <p>
+                                  {truncateText(
+                                    story.slides[0].description,
+                                    8
+                                  )}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         ))}
                       {stories[category.name]?.length > 4 &&
                         visibleStories[category.name] <
                           stories[category.name].length && (
-                          <button
-                            className="see-more-button"
-                            onClick={() => handleSeeMore(category.name)}
-                          >
-                            See More
-                          </button>
+                          <div className="see-more-container">
+                            <button
+                              className="see-more-button"
+                              onClick={() => handleSeeMore(category.name)}
+                            >
+                              See More
+                            </button>
+                          </div>
                         )}
                     </div>
                   ) : (
@@ -303,7 +345,7 @@ const HomePage = ({ isLoggedIn }) => {
               ))
           : selectedCategories.map((category) => (
               <div key={category} className="story-section">
-                <h2>Top stories from {category}</h2>
+                <h2>Top Stories About {category}</h2>
                 {stories[category]?.length > 0 ? (
                   <div className="stories-list">
                     {stories[category]
@@ -312,16 +354,14 @@ const HomePage = ({ isLoggedIn }) => {
                         <div
                           key={story._id}
                           className="story-card"
-                          onClick={() => setSelectedStory(story)} // Open the StoryDetailsPage when clicked
+                          onClick={() => setSelectedStory(story)}
                         >
-                          <h3>{story.title}</h3>
-                          <p>Category: {story.category}</p>
                           {story.slides[0] &&
                             (story.slides[0].type === "video" ? (
                               isYouTubeVideo(story.slides[0].content) ? (
                                 <iframe
-                                  width="200"
-                                  height="150"
+                                  width="100%"
+                                  height="200px"
                                   src={getYouTubeEmbedUrl(
                                     story.slides[0].content
                                   )}
@@ -332,7 +372,8 @@ const HomePage = ({ isLoggedIn }) => {
                                 ></iframe>
                               ) : (
                                 <video
-                                  width="200"
+                                  width="100%"
+                                  height="200px"
                                   controls
                                   ref={(el) =>
                                     (videoRefs.current[story._id] = el)
@@ -349,19 +390,33 @@ const HomePage = ({ isLoggedIn }) => {
                               <img
                                 src={story.slides[0].content}
                                 alt="slide preview"
-                                width="200"
+                                width="100%"
+                                height="200px"
                               />
                             ))}
+
+                          <div className="home-story-text-overlay">
+                            {story.slides[0].heading && (
+                              <h3>{story.slides[0].heading}</h3>
+                            )}
+                            {story.slides[0].description && (
+                              <p>
+                                {truncateText(story.slides[0].description, 8)}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       ))}
                     {stories[category]?.length > 4 &&
                       visibleStories[category] < stories[category].length && (
-                        <button
-                          className="see-more-button"
-                          onClick={() => handleSeeMore(category)}
-                        >
-                          See More
-                        </button>
+                        <div className="see-more-container">
+                          <button
+                            className="see-more-button"
+                            onClick={() => handleSeeMore(category.name)}
+                          >
+                            See More
+                          </button>
+                        </div>
                       )}
                   </div>
                 ) : (
@@ -371,7 +426,6 @@ const HomePage = ({ isLoggedIn }) => {
             ))}
       </div>
 
-      {/* StoryDetailsPage Popup */}
       {selectedStory && (
         <StoryDetailsPage
           story={selectedStory}

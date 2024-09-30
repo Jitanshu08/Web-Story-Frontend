@@ -1,101 +1,173 @@
-/* Popup overlay to darken the background */
-.popup-overlay {
+/* Story popup overlay to darken the background */
+.story-popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.9); /* Dark semi-transparent background */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000; /* Ensure it's on top of everything */
 }
 
-/* Centered popup content */
-.popup-content {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-  width: 257px; /* Set the width to 257px */
-  height: 459px; /* Set the height to 459px */
+/* Centered popup content with media */
+.story-popup-content {
   position: relative;
-  overflow: hidden; /* Ensure no overflow beyond the specified size */
-}
-
-/* Restricting the media size */
-.media-container {
-  width: 257px; /* Adjust width */
-  height: 257px; /* Adjust height to keep a proper aspect ratio */
+  width: 300px;
+  height: 600px;
+  border-radius: 10px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: black;
+  z-index: 10; /* Ensure it's above other elements */
 }
 
-/* Close button styling */
-.close-button {
+/* Header icons (cross and send icon) */
+.story-header-icons {
+  display: flex;
+  justify-content: space-between;
   position: absolute;
-  top: 10px;
+  top: 25px;
+  left: 10px;
   right: 10px;
-  background-color: transparent;
-  border: none;
-  font-size: 1.5rem;
+}
+
+.story-close-button {
+  width: 14px;
+  height: 14px;
   cursor: pointer;
 }
 
-/* Slide content styling */
-.slide-content {
-  text-align: center;
-  margin-bottom: 1rem;
+.story-send-button {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
-/* Actions container for Like and Bookmark buttons */
-.actions-container {
+/* Progress bar container */
+.story-progress-bar-container {
+  position: absolute;
+  top: 0;
+  width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
+  padding: 0 10px;
   margin-top: 10px;
 }
 
-.like-button, .bookmark-button {
-  padding: 0.5rem 1rem;
-  border: none;
+.story-progress-bar {
+  flex-grow: 1;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.4);
+  margin: 0 2px;
   border-radius: 5px;
-  cursor: pointer;
 }
 
-.like-button {
-  background-color: #f44336;
+.story-progress-bar.active {
+  background-color: white;
+  transition: width 45s linear;
+}
+
+/* Media container */
+.story-media-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 100px; /* Added margin for spacing */
+}
+
+.story-media-container img,
+.story-media-container video,
+.story-media-container iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.story-loading-spinner {
+  font-size: 18px;
+  color: #fff;
+}
+
+/* Story text overlay (heading and description) */
+.story-text-overlay {
+  position: absolute;
+  bottom: 60px;
+  left: 20px;
+  right: 20px;
+  text-align: left;
   color: white;
 }
 
-.liked {
-  background-color: #d32f2f; /* Red color for liked state */
+.story-heading {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
-.bookmark-button {
-  background-color: #2196f3;
-  color: white;
+.story-description {
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.4;
 }
 
-.bookmarked {
-  background-color: #1976d2; /* Different color for bookmarked state */
-}
-
-/* Navigation buttons */
-.navigation-buttons {
+/* Footer icons (bookmark and like icons) */
+.story-footer-icons {
   display: flex;
   justify-content: space-between;
-  margin-top: 1rem;
+  position: absolute;
+  bottom: 10px;
+  left: 20px;
+  right: 20px;
 }
 
-.navigation-buttons button {
-  padding: 0.5rem 1rem;
-  background-color: #2196f3;
-  color: white;
-  border: none;
-  border-radius: 5px;
+.story-bookmark-container {
+  display: flex;
+  align-items: center;
+}
+
+.story-like-container {
+  display: flex;
+  align-items: center;
+}
+
+.story-bookmark-icon,
+.story-like-icon {
+  width: 24px;
+  height: 24px;
   cursor: pointer;
 }
 
-.navigation-buttons button:hover {
-  background-color: #1976d2;
+.story-like-count {
+  margin-left: 5px;
+  color: white;
+  font-size: 0.9rem;
+}
+
+/* Navigation buttons for next and previous slides */
+.story-previous-button,
+.story-next-button {
+  position: fixed; /* Changed to fixed position */
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 40px; /* Increased button size */
+  height: 60px;
+  z-index: 101; /* Ensure buttons are above content */
+}
+
+.story-previous-button {
+  left: 20%; /* Adjusted to be relative to the viewport */
+}
+
+.story-next-button {
+  right: 20%; /* Adjusted to be relative to the viewport */
 }

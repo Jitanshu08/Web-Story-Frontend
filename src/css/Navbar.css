@@ -1,6 +1,6 @@
 .navbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: right;
   align-items: center;
   padding: 1rem;
   background: rgba(255, 255, 255, 1);
@@ -14,24 +14,51 @@
 .navbar-buttons {
   display: flex;
   gap: 1rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .navbar-button {
-  background-color: #2196f3;
+  background-color: rgba(255, 115, 115, 1);
   color: white;
   border: none;
   padding: 10px 20px;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 20px;
+  font-size: 1rem;
 }
 
 .navbar-button:hover {
-  background-color: #1976d2;
+  background-color: #d33e3e;
+}
+
+.bookmark-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bookmark-icon,
+.dropdown-bookmark-icon {
+  width: 15px;
+  height: 18.5px;
+  margin-right: 8px;
 }
 
 .user-menu {
   position: relative;
-  display: inline-block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.user-icon {
+  border-radius: 20px;
+  width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 115, 115, 1);
 }
 
 .hamburger-icon {
@@ -39,32 +66,92 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
+  color: black;
+  display: block;
 }
 
-.dropdown-content {
+.hamburger-menu {
   display: block;
+}
+
+/* Dropdown for desktop version */
+.dropdown-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   position: absolute;
   right: 0;
   background-color: white;
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   padding: 10px;
   z-index: 1;
+  width: 200px;
+  text-align: center;
+}
+
+.mobile-user-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
 }
 
 .dropdown-content p {
-  margin: 0;
-  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-button {
+  background-color: rgba(255, 115, 115, 1);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  cursor: pointer;
 }
 
 .logout-button {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
+  background-color: rgba(255, 115, 115, 1);
 }
 
 .logout-button:hover {
   background-color: #d32f2f;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  .navbar-buttons {
+    display: none;
+  }
+
+  .hamburger-icon {
+    display: block;
+  }
+
+  .hamburger-menu {
+    display: block;
+  }
+
+  /* Dropdown content changes for mobile */
+  .dropdown-content {
+    position: fixed;
+    top: 55px;
+    left: 0;
+    width: 100%; /* Full width */
+    height: 50vh; 
+    background-color: white;
+    box-shadow: none; /* Remove shadow for full-screen look */
+    justify-content: flex-start;
+    padding-top: 20px;
+    text-align: center;
+    z-index: 1000;
+  }
+
+  .dropdown-button {
+    width: 29%; /* Wider buttons in mobile */
+    margin: 10px auto; /* Center buttons with margin */
+    display: flex;
+    justify-content: center;
+  }
 }

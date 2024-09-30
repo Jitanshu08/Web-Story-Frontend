@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import "../css/Navbar.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import BookmarkIcon from "../assets/bookmark.png"; // Import the bookmark icon
 
 const Navbar = ({
   toggleLogin,
@@ -10,81 +11,155 @@ const Navbar = ({
   loggedIn,
   handleLogout,
 }) => {
-  const [username, setUsername] = useState(null); // Default to null instead of empty string
+  const [username, setUsername] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     if (loggedIn) {
       const token = localStorage.getItem("token");
       if (token) {
-        // Fetch the user info from the backend
         axios
           .get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           .then((response) => {
-            setUsername(response.data.username); // Set the username from the response
+            setUsername(response.data.username);
           })
           .catch(() => {
-            setUsername(null); // Reset username on error
+            setUsername(null);
           });
       }
     } else {
-      setUsername(null); // Reset the username if the user is logged out
+      setUsername(null);
     }
   }, [loggedIn]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const handleLogoutClick = () => {
     handleLogout();
-    setDropdownOpen(false); // Close the dropdown on logout
-    setUsername(null); // Clear the username on logout
+    setDropdownOpen(false);
+    setUsername(null);
   };
 
   const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen); // Toggle the dropdown state
+    setDropdownOpen(!dropdownOpen);
   };
 
   return (
     <nav className="navbar">
-      <h1>Story Platform</h1>
+      <h1> </h1>
       <div className="navbar-buttons">
         {loggedIn && username ? (
           <>
-            <Link to="/bookmarks">
-              <button className="navbar-button">Bookmarks</button>
-            </Link>
-            <button className="navbar-button" onClick={toggleAddStory}>
-              Add Story
-            </button>
-            <div className="user-menu">
-              <button className="user-icon">
-                {username[0].toUpperCase()}{" "}
-                {/* Show the first letter of the username */}
-              </button>
-              <button className="hamburger-icon" onClick={toggleDropdown}>
-                &#9776;
-              </button>
-              {dropdownOpen && (
-                <div className="dropdown-content">
-                  <p>{username}</p>
-                  <button className="logout-button" onClick={handleLogoutClick}>
-                    Logout
+            {!isMobile && (
+              <>
+                <Link to="/bookmarks">
+                  <button className="navbar-button bookmark-button">
+                    <img
+                      src={BookmarkIcon}
+                      alt="Bookmark"
+                      className="bookmark-icon"
+                    />
+                    Bookmarks
+                  </button>
+                </Link>
+                <button className="navbar-button" onClick={toggleAddStory}>
+                  Add Story
+                </button>
+                <div className="user-menu">
+                  <button className="user-icon">
+                    {username[0].toUpperCase()}
                   </button>
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </>
         ) : (
           <>
-            <button className="navbar-button" onClick={toggleRegister}>
-              Register
-            </button>
-            <button className="navbar-button" onClick={toggleLogin}>
-              Sign In
-            </button>
+            {!isMobile && (
+              <>
+                <button className="navbar-button" onClick={toggleRegister}>
+                  Register
+                </button>
+                <button className="navbar-button" onClick={toggleLogin}>
+                  Sign In
+                </button>
+              </>
+            )}
           </>
         )}
       </div>
+
+      {/* Hamburger Menu */}
+      {loggedIn || isMobile ? ( // Show hamburger when logged in or on mobile regardless of login status
+        <div className="hamburger-menu">
+          <button className="hamburger-icon" onClick={toggleDropdown}>
+            &#9776;
+          </button>
+          {dropdownOpen && (
+            <div className="dropdown-content">
+              {loggedIn && username ? (
+                <>
+                  <p>
+                    <span className="mobile-user-icon">
+                      <button className="user-icon">
+                        {username[0].toUpperCase()}
+                      </button>
+                    </span>
+                    {username}
+                  </p>
+                  {isMobile && (
+                    <>
+                      <Link to="/your-stories">
+                        <button className="dropdown-button">Your Story</button>
+                      </Link>
+                      <button
+                        className="dropdown-button"
+                        onClick={toggleAddStory}
+                      >
+                        Add Story
+                      </button>
+                      <Link to="/bookmarks">
+                        <button className="dropdown-button">
+                          <img
+                            src={BookmarkIcon}
+                            alt="Bookmark"
+                            className="dropdown-bookmark-icon"
+                          />
+                          Bookmarks
+                        </button>
+                      </Link>
+                    </>
+                  )}
+                  <button
+                    className="dropdown-button logout-button"
+                    onClick={handleLogoutClick}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="dropdown-button" onClick={toggleLogin}>
+                    Sign In
+                  </button>
+                  <button className="dropdown-button" onClick={toggleRegister}>
+                    Register
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      ) : null}
     </nav>
   );
 };

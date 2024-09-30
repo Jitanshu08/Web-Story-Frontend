@@ -1,41 +1,34 @@
 import { useState, useRef } from "react";
 import axios from "axios";
 import "../css/AddStoryPage.css";
+import CloseIcon from "../assets/Close.png"; // Importing Close icon
 
 const AddStoryPage = ({ closePopup }) => {
-  const [title, setTitle] = useState("");
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0); // Track the current slide
   const [slides, setSlides] = useState([
-    { content: "", description: "", category: "Food", type: "" },
+    { heading: "", content: "", description: "", category: "Food", type: "" },
+    { heading: "", content: "", description: "", category: "Food", type: "" },
+    { heading: "", content: "", description: "", category: "Food", type: "" },
   ]);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const videoRefs = useRef([]);
 
   const getFileTypeFromUrl = (url) => {
-    if (!url || (!url.startsWith("http") && !url.startsWith("www."))) {
-      return "unknown";
-    }
-
     const imageExtensions = [".jpg", ".jpeg", ".png", ".gif"];
     const videoExtensions = [".mp4", ".avi", ".mov"];
     const videoDomains = ["youtube.com", "youtu.be"];
 
+    if (!url || (!url.startsWith("http") && !url.startsWith("www.")))
+      return "unknown";
+
     try {
       const urlObj = new URL(url);
-      const hostname = urlObj.hostname;
-
-      if (videoDomains.includes(hostname)) {
-        return "video";
-      }
-
-      if (imageExtensions.some((ext) => url.endsWith(ext))) {
-        return "image";
-      } else if (videoExtensions.some((ext) => url.endsWith(ext))) {
-        return "video";
-      } else {
-        return "unknown";
-      }
-    } catch (error) {
+      if (videoDomains.includes(urlObj.hostname)) return "video";
+      if (imageExtensions.some((ext) => url.endsWith(ext))) return "image";
+      if (videoExtensions.some((ext) => url.endsWith(ext))) return "video";
+      return "unknown";
+    } catch {
       return "unknown";
     }
   };
@@ -44,8 +37,15 @@ const AddStoryPage = ({ closePopup }) => {
     if (slides.length < 6) {
       setSlides([
         ...slides,
-        { content: "", description: "", category: "Food", type: "" },
+        {
+          heading: "",
+          content: "",
+          description: "",
+          category: "Food",
+          type: "",
+        },
       ]);
+      setCurrentSlideIndex(slides.length); // Move to the new slide
     } else {
       setError("You can only add up to 6 slides.");
     }
@@ -55,6 +55,7 @@ const AddStoryPage = ({ closePopup }) => {
     if (slides.length > 3) {
       const updatedSlides = slides.filter((_, i) => i !== index);
       setSlides(updatedSlides);
+      setCurrentSlideIndex(0); // Reset to first slide after removal
     } else {
       setError("A story must have at least 3 slides.");
     }
@@ -82,14 +83,21 @@ const AddStoryPage = ({ closePopup }) => {
     }
 
     try {
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/stories/add`,
-        { title, slides },
+        { slides },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setTitle("");
-      setSlides([{ content: "", description: "", category: "Food", type: "" }]);
+      setSlides([
+        {
+          heading: "",
+          content: "",
+          description: "",
+          category: "Food",
+          type: "",
+        },
+      ]);
       setError("");
       setSuccessMessage("Story added successfully!");
     } catch (error) {
@@ -99,15 +107,14 @@ const AddStoryPage = ({ closePopup }) => {
 
   const handleContentChange = (e, index) => {
     const updatedSlides = [...slides];
-    const content = e.target.value;
-    updatedSlides[index].content = content;
+    updatedSlides[index].content = e.target.value;
+    updatedSlides[index].type = getFileTypeFromUrl(e.target.value);
+    setSlides(updatedSlides);
+  };
 
-    if (content.startsWith("http") || content.startsWith("www.")) {
-      updatedSlides[index].type = getFileTypeFromUrl(content);
-    } else {
-      updatedSlides[index].type = "unknown";
-    }
-
+  const handleHeadingChange = (e, index) => {
+    const updatedSlides = [...slides];
+    updatedSlides[index].heading = e.target.value;
     setSlides(updatedSlides);
   };
 
@@ -123,52 +130,109 @@ const AddStoryPage = ({ closePopup }) => {
     }
   };
 
+  // Next and Previous Slide Navigation
+  const handleNextSlide = () => {
+    if (currentSlideIndex < slides.length - 1) {
+      setCurrentSlideIndex((prevIndex) => prevIndex + 1);
+    }
+  };
+
+  const handlePreviousSlide = () => {
+    if (currentSlideIndex > 0) {
+      setCurrentSlideIndex((prevIndex) => prevIndex - 1);
+    }
+  };
+
   return (
     <div className="add-story-popup">
-      <button className="close-button" onClick={closePopup}>
-        X
-      </button>
-      <h2>Add New Story</h2>
+      <img
+        className="close-button"
+        src={CloseIcon}
+        alt="Close"
+        onClick={closePopup}
+      />
 
       {error && <p className="error-message">{error}</p>}
       {successMessage && <p className="success-message">{successMessage}</p>}
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </div>
+      <div className="slides-navigation">
+        {slides.map((_, index) => (
+          <div
+            key={index}
+            className={`slide-nav-item ${
+              currentSlideIndex === index ? "active" : ""
+            }`}
+          >
+            <button onClick={() => setCurrentSlideIndex(index)}>
+              Slide {index + 1}
+            </button>
+            {slides.length > 3 && (
+              <img
+                src={CloseIcon}
+                alt="Remove slide"
+                className="remove-slide-icon"
+                onClick={() => handleRemoveSlide(index)}
+              />
+            )}
+          </div>
+        ))}
 
-        {slides.map((slide, index) => (
-          <div key={index} className="slide-container">
-            <label>Slide Content (URL)</label>
+        <button
+          className="add-slide-button"
+          type="button"
+          onClick={handleAddSlide}
+          disabled={slides.length >= 6}
+        >
+          Add +
+        </button>
+      </div>
+
+      <form className="add-story-form" onSubmit={handleSubmit}>
+        <div className="slide-container">
+          <div className="Labels">
+            <label>Heading:</label>
             <input
+              placeholder="Your heading"
               type="text"
-              value={slide.content}
-              onChange={(e) => handleContentChange(e, index)}
+              value={slides[currentSlideIndex]?.heading || ""}
+              onChange={(e) => handleHeadingChange(e, currentSlideIndex)}
               required
             />
-            <p>Type: {slide.type}</p>
+          </div>
 
-            <label>Description</label>
-            <input
+          <div className="Labels">
+            <label>Description:</label>
+            <textarea
+              className="description"
+              rows="8"
+              cols="60"
               type="text"
-              value={slide.description}
-              onChange={(e) => handleDescriptionChange(e, index)}
+              placeholder="Story Description"
+              value={slides[currentSlideIndex]?.description || ""}
+              onChange={(e) => handleDescriptionChange(e, currentSlideIndex)}
               required
             />
+          </div>
 
-            <label>Category</label>
+          <div className="Labels">
+            <label>Image/Video(URL):</label>
+            <input
+              type="text"
+              placeholder="Add Image/Video url"
+              value={slides[currentSlideIndex]?.content || ""}
+              onChange={(e) => handleContentChange(e, currentSlideIndex)}
+              required
+            />
+          </div>
+          <p>Type: {slides[currentSlideIndex]?.type || "unknown"}</p>
+
+          <div className="Labels">
+            <label>Category:</label>
             <select
-              value={slide.category}
+              value={slides[currentSlideIndex]?.category || "Food"}
               onChange={(e) => {
                 const updatedSlides = [...slides];
-                updatedSlides[index].category = e.target.value;
+                updatedSlides[currentSlideIndex].category = e.target.value;
                 setSlides(updatedSlides);
               }}
             >
@@ -178,31 +242,38 @@ const AddStoryPage = ({ closePopup }) => {
               <option value="Movie">Movie</option>
               <option value="Education">Education</option>
             </select>
+          </div>
+          {slides[currentSlideIndex]?.type === "video" && (
+            <video
+              ref={(el) => (videoRefs.current[currentSlideIndex] = el)}
+              src={slides[currentSlideIndex]?.content || ""}
+              onLoadedMetadata={(e) => handleMetadataLoad(currentSlideIndex, e)}
+              style={{ display: "none" }}
+            />
+          )}
+        </div>
 
-            {slide.type === "video" && (
-              <video
-                ref={(el) => (videoRefs.current[index] = el)}
-                src={slide.content}
-                onLoadedMetadata={(e) => handleMetadataLoad(index, e)}
-                style={{ display: "none" }}
-              />
-            )}
-
-            <button type="button" onClick={() => handleRemoveSlide(index)}>
-              Remove Slide
+        <div className="form-actions">
+          <div className="Navigator">
+            <button
+              className="previous-button"
+              type="button"
+              onClick={handlePreviousSlide}
+            >
+              Previous
+            </button>
+            <button
+              className="next-button"
+              type="button"
+              onClick={handleNextSlide}
+            >
+              Next
             </button>
           </div>
-        ))}
-
-        <button
-          type="button"
-          onClick={handleAddSlide}
-          disabled={slides.length >= 6}
-        >
-          Add Slide
-        </button>
-
-        <button type="submit">Submit Story</button>
+          <button type="submit" className="submit-button">
+            Post
+          </button>
+        </div>
       </form>
     </div>
   );
