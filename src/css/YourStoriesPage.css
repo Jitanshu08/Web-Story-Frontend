@@ -1,74 +1,84 @@
 /* Your Stories Page CSS - unique classes */
 .your-stories-page {
-    text-align: center;
-    padding: 1rem;
-    margin-top: 70px;
-  }
-  
-  .your-stories-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    justify-content: center;
-    padding: 1rem;
-  }
-  
-  .your-story-card {
-    background-color: #000;
-    color: #fff;
-    padding: 1rem;
-    border-radius: 10px;
-    position: relative;
-    height: auto;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .your-story-card h3 {
-    font-size: 1.4rem;
-    margin-bottom: 10px;
-    text-align: left;
-  }
-  
-  .your-story-text p {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-    text-align: left;
-  }
-  
-  .your-story-edit-button {
-    position: absolute;
-    bottom: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #fff;
-    color: #000;
-    padding: 5px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  }
-  
-  .your-story-edit-icon {
-    width: 18px;
-    margin-right: 5px;
-  }
-  
-  .your-see-more-container {
-    text-align: center;
-  }
-  
-  .your-see-more-button {
-    background-color: rgba(255, 115, 115, 1);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-  }
-  
-  .your-see-more-button:hover {
-    background-color: rgba(255, 95, 95, 1);
-  }
-  
+  text-align: center;
+  padding: 1rem;
+  margin-top: 70px;
+}
+
+.your-stories-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.your-story-card {
+  background-color: #000;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  position: relative;
+  height: auto;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.your-story-card:hover {
+  transform: translateY(-5px); /* Add a hover effect to raise the card slightly */
+}
+
+.your-story-card h3 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.your-story-text p {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.your-story-edit-button {
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  color: #000;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  z-index: 10; /* Ensure the edit button is above other elements */
+}
+
+.your-story-edit-button:hover {
+  background-color: rgba(200, 200, 200, 1);
+}
+
+.your-story-edit-icon {
+  width: 18px;
+  margin-right: 5px;
+}
+
+.your-see-more-container {
+  text-align: center;
+}
+
+.your-see-more-button {
+  background-color: rgba(255, 115, 115, 1);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.your-see-more-button:hover {
+  background-color: rgba(255, 95, 95, 1);
+}

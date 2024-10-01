@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "../css/YourStoriesPage.css"; // Custom CSS for the Your Stories Page
+import "../css/YourStoriesPage.css";
 import EditIcon from "../assets/edit.png";
 
-const YourStoriesPage = ({ isLoggedIn }) => {
+const YourStoriesPage = ({ isLoggedIn, openEditStory }) => {
   const [yourStories, setYourStories] = useState([]);
   const [visibleYourStories, setVisibleYourStories] = useState(4);
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ const YourStoriesPage = ({ isLoggedIn }) => {
   }, [isLoggedIn]);
 
   const handleEditStory = (storyId) => {
-    navigate(`/edit-story/${storyId}`);
+    openEditStory(storyId);
   };
 
   const handleSeeMoreYourStories = () => {
@@ -85,7 +85,10 @@ const YourStoriesPage = ({ isLoggedIn }) => {
               </div>
               <button
                 className="your-story-edit-button"
-                onClick={() => handleEditStory(story._id)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering card click
+                  handleEditStory(story._id);
+                }}  
               >
                 <img
                   className="your-story-edit-icon"

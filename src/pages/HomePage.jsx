@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Import useNavigate and useLocation
 import "../css/HomePage.css";
-import StoryDetailsPage from "./StoryDetailPage";
 
 // Import images for categories
 import allImage from "../assets/all.png";
@@ -13,16 +12,16 @@ import movieImage from "../assets/world.png";
 import educationImage from "../assets/education.jpg";
 import EditIcon from "../assets/edit.png";
 
-const HomePage = ({ isLoggedIn }) => {
+const HomePage = ({ isLoggedIn, openEditStory }) => {
   const [selectedCategories, setSelectedCategories] = useState(["All"]);
   const [stories, setStories] = useState({});
   const [yourStories, setYourStories] = useState([]);
   const [visibleStories, setVisibleStories] = useState({});
   const [visibleYourStories, setVisibleYourStories] = useState(4);
-  const [selectedStory, setSelectedStory] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const videoRefs = useRef({});
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Use navigate for URL handling
+  const location = useLocation(); // Use location to track the current URL
 
   // Handle window resize to detect mobile screen
   useEffect(() => {
@@ -144,7 +143,12 @@ const HomePage = ({ isLoggedIn }) => {
   };
 
   const handleEditStory = (storyId) => {
-    navigate(`/edit-story/${storyId}`);
+    openEditStory(storyId); // open the edit story popup
+  };
+
+  const handleStoryClick = (story) => {
+    // Redirect to story details page and preserve background for modal rendering
+    navigate(`/stories/${story._id}`, { state: { background: location } });
   };
 
   return (
@@ -168,7 +172,7 @@ const HomePage = ({ isLoggedIn }) => {
         ))}
       </div>
 
-      {isLoggedIn && !isMobile &&(
+      {isLoggedIn && !isMobile && (
         <div className="user-stories-section">
           <h2>Your Stories</h2>
           {yourStories.length > 0 ? (
@@ -177,7 +181,7 @@ const HomePage = ({ isLoggedIn }) => {
                 <div
                   key={story._id}
                   className="story-card"
-                  onClick={() => setSelectedStory(story)}
+                  onClick={() => handleStoryClick(story)}
                 >
                   {story.slides[0] &&
                     (story.slides[0].type === "video" ? (
@@ -225,7 +229,10 @@ const HomePage = ({ isLoggedIn }) => {
 
                   <button
                     className="edit-button"
-                    onClick={() => handleEditStory(story._id)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent opening story details
+                      handleEditStory(story._id);
+                    }}
                   >
                     <img
                       className="edit-button-icon"
@@ -269,7 +276,7 @@ const HomePage = ({ isLoggedIn }) => {
                           <div
                             key={story._id}
                             className="story-card"
-                            onClick={() => setSelectedStory(story)}
+                            onClick={() => handleStoryClick(story)}
                           >
                             {story.slides[0] &&
                               (story.slides[0].type === "video" ? (
@@ -316,10 +323,7 @@ const HomePage = ({ isLoggedIn }) => {
                               )}
                               {story.slides[0].description && (
                                 <p>
-                                  {truncateText(
-                                    story.slides[0].description,
-                                    8
-                                  )}
+                                  {truncateText(story.slides[0].description, 8)}
                                 </p>
                               )}
                             </div>
@@ -354,7 +358,7 @@ const HomePage = ({ isLoggedIn }) => {
                         <div
                           key={story._id}
                           className="story-card"
-                          onClick={() => setSelectedStory(story)}
+                          onClick={() => handleStoryClick(story)}
                         >
                           {story.slides[0] &&
                             (story.slides[0].type === "video" ? (
@@ -425,13 +429,6 @@ const HomePage = ({ isLoggedIn }) => {
               </div>
             ))}
       </div>
-
-      {selectedStory && (
-        <StoryDetailsPage
-          story={selectedStory}
-          onClose={() => setSelectedStory(null)}
-        />
-      )}
     </div>
   );
 };

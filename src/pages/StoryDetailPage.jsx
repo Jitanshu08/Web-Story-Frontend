@@ -1,107 +1,127 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import "../css/StoryDetailsPage.css"; // Add necessary styling for the popup
-import CrossIcon from "../assets/cross.png"; // Import the cross icon
-import SendIcon from "../assets/send.png"; // Import the send/share icon
-import NextIcon from "../assets/next.png"; // Import the next icon
-import PreviousIcon from "../assets/previous.png"; // Import the previous icon
-import BookmarkIcon from "../assets/bookmark.png"; // Import bookmark icon
-import BookmarkedIcon from "../assets/bookmarked.png"; // Import bookmarked icon
-import LikeIcon from "../assets/like.png"; // Import like icon
-import LikedIcon from "../assets/liked.png"; // Import liked icon
+import { useParams, useNavigate } from "react-router-dom"; // Use useParams to get the story ID from the URL
+import "../css/StoryDetailsPage.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const StoryDetailsPage = ({ story, onClose }) => {
+import CrossIcon from "../assets/cross.png";
+import SendIcon from "../assets/send.png";
+import NextIcon from "../assets/next.png";
+import PreviousIcon from "../assets/previous.png";
+import BookmarkIcon from "../assets/bookmark.png";
+import BookmarkedIcon from "../assets/bookmarked.png";
+import LikeIcon from "../assets/like.png";
+import LikedIcon from "../assets/liked.png";
+import DownloadIcon from "../assets/download.png";
+import DownloadDoneIcon from "../assets/download_done.png";
+
+const StoryDetailsPage = ({ story: initialStory, onClose }) => {
+  const [story, setStory] = useState(initialStory || null); // Initialize story state
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const [timer, setTimer] = useState(null);
-  const [likesCount, setLikesCount] = useState(
-    story.slides.map((slide) => slide.likes.length)
-  );
-  const [isLiked, setIsLiked] = useState(story.slides.map((slide) => false)); // To track likes for each slide
-  const [isBookmarked, setIsBookmarked] = useState(false); // Track bookmark status
-  const [isLoading, setIsLoading] = useState(true); // Loading state for media
+  const [likesCount, setLikesCount] = useState([]);
+  const [isLiked, setIsLiked] = useState([]);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDownloaded, setIsDownloaded] = useState(false);
 
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  // Fetch story if not provided as a prop
   useEffect(() => {
-    const checkBookmarkStatus = async () => {
-      const token = localStorage.getItem("token");
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/api/stories/bookmarks`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
+    if (!story) {
+      const fetchStory = async () => {
+        try {
+          const response = await axios.get(
+            `${import.meta.env.VITE_API_BASE_URL}/api/stories/${id}`
+          );
+          setStory(response.data);
+          setLikesCount(
+            response.data.slides.map((slide) => slide.likes.length)
+          );
+          setIsLiked(response.data.slides.map(() => false));
+          setIsLoading(false);
+        } catch (error) {
+          console.error("Error fetching story:", error);
+          setIsLoading(false);
+          // Handle case when story is not found
+          if (error.response && error.response.status === 404) {
+            toast.error("Story not found", {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: true,
+              className: "error-toast",
+            });
           }
-        );
-        const bookmarkedStories = response.data;
-        setIsBookmarked(
-          bookmarkedStories.some(
-            (bookmarkedStory) => bookmarkedStory._id === story._id
-          )
-        );
-      } catch (error) {
-        console.error("Error fetching bookmark status", error);
-      }
+        }
+      };
+
+      fetchStory();
+    } else {
+      setIsLoading(false);
+      setLikesCount(story.slides.map((slide) => slide.likes.length));
+      setIsLiked(story.slides.map(() => false));
+    }
+    return () => {
+      setIsLoading(false); // Cleanup to reset loading state when component unmounts
     };
+  }, [id, story]);
 
-    checkBookmarkStatus();
-  }, [story._id]);
-
+  // Bookmark check effect
   useEffect(() => {
-    clearTimeout(timer);
+    if (story) {
+      const checkBookmarkStatus = async () => {
+        const token = localStorage.getItem("token");
+        try {
+          const response = await axios.get(
+            `${import.meta.env.VITE_API_BASE_URL}/api/stories/bookmarks`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          const bookmarkedStories = response.data;
+          setIsBookmarked(
+            bookmarkedStories.some(
+              (bookmarkedStory) => bookmarkedStory._id === story._id
+            )
+          );
+        } catch (error) {
+          console.error("Error fetching bookmark status", error);
+        }
+      };
 
-    const newTimer = setTimeout(() => {
-      if (currentSlideIndex < story.slides.length - 1) {
-        setCurrentSlideIndex((prev) => prev + 1);
-      }
-    }, 45000); // Adjust the timer as per the required duration
-
-    setTimer(newTimer);
-
-    return () => clearTimeout(newTimer);
-  }, [currentSlideIndex, story.slides.length]);
+      checkBookmarkStatus();
+    }
+  }, [story]);
 
   const nextSlide = () => {
-    setIsLoading(true);
     setCurrentSlideIndex((prev) =>
       prev < story.slides.length - 1 ? prev + 1 : prev
     );
   };
 
   const previousSlide = () => {
-    setIsLoading(true);
     setCurrentSlideIndex((prev) => (prev > 0 ? prev - 1 : prev));
-  };
-
-  const currentSlide = story.slides[currentSlideIndex];
-
-  const isYouTubeVideo = (url) => {
-    return url.includes("youtube.com") || url.includes("youtu.be");
-  };
-
-  const getYouTubeEmbedUrl = (url) => {
-    if (url.includes("watch?v=")) {
-      return url.replace("watch?v=", "embed/");
-    } else if (url.includes("youtu.be/")) {
-      return url.replace("youtu.be/", "www.youtube.com/embed/");
-    }
-    return url;
   };
 
   const handleLikeSlide = async (slideId, index) => {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/stories/like/${story._id}/${slideId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/stories/like/${
+          story._id
+        }/${slideId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       setLikesCount((prev) => {
         const newLikesCount = [...prev];
         newLikesCount[index] = response.data.likes;
         return newLikesCount;
       });
-
       setIsLiked((prev) => {
         const newIsLiked = [...prev];
         newIsLiked[index] = !newIsLiked[index];
@@ -116,45 +136,95 @@ const StoryDetailsPage = ({ story, onClose }) => {
     const token = localStorage.getItem("token");
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/stories/bookmark/${story._id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/stories/bookmark/${
+          story._id
+        }`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       setIsBookmarked(!isBookmarked);
     } catch (error) {
       console.error("Error bookmarking story", error);
     }
   };
 
-  const handleShareStory = async () => {
+  const handleDownloadSlide = async (slideId) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/stories/share/${story._id}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/stories/download/${
+          story._id
+        }/${slideId}`
       );
-      const { link } = response.data;
-      navigator.clipboard.writeText(link);
-      alert("Story link copied to clipboard!");
+      const { slideURL } = response.data;
+
+      const link = document.createElement("a");
+      link.href = slideURL;
+      link.download = `slide_${currentSlideIndex + 1}`;
+      link.click();
+
+      setIsDownloaded(true);
+      toast.success("Downloaded Successfully", {
+        position: "bottom-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        className: "download-toast",
+      });
     } catch (error) {
-      console.error("Error sharing story", error);
+      console.error("Error downloading slide", error);
     }
   };
 
-  const handleMediaLoad = () => {
-    setIsLoading(false); // Set loading to false once media is loaded
+  const handleShareStory = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/stories/${story._id}/share`
+      );
+      const { link } = response.data;
+      navigator.clipboard.writeText(link);
+      toast.success("Link copied to clipboard", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        className: "share-toast",
+      });
+    } catch (error) {
+      console.error("Error sharing story", error);
+      toast.error("Error sharing story", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        className: "error-toast",
+      });
+    }
   };
+  const handleClose = () => {
+    setIsLoading(false);
+    if (onClose) {
+      onClose();
+    } else {
+      navigate("/");
+    }
+  };
+
+  // If story is not yet loaded, show a loading message
+  if (isLoading || !story) {
+    return <div>Loading...</div>;
+  }
+
+  const currentSlide = story.slides[currentSlideIndex];
 
   return (
     <div className="story-popup-overlay">
       <div className="story-popup-content">
-        {/* Progress bars */}
         <div className="story-progress-bar-container">
           {story.slides.map((_, index) => (
             <div
               key={index}
-              className={`story-progress-bar ${index === currentSlideIndex ? "active" : ""}`}
+              className={`story-progress-bar ${
+                index === currentSlideIndex ? "active" : ""
+              }`}
             ></div>
           ))}
         </div>
@@ -164,7 +234,7 @@ const StoryDetailsPage = ({ story, onClose }) => {
             src={CrossIcon}
             alt="Close"
             className="story-close-button"
-            onClick={onClose}
+            onClick={handleClose}
           />
           <img
             src={SendIcon}
@@ -177,28 +247,14 @@ const StoryDetailsPage = ({ story, onClose }) => {
         <div className="story-media-container">
           {isLoading && <div className="story-loading-spinner">Loading...</div>}
           {currentSlide.type === "video" ? (
-            isYouTubeVideo(currentSlide.content) ? (
-              <iframe
-                src={getYouTubeEmbedUrl(currentSlide.content)}
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                onLoad={handleMediaLoad}
-              ></iframe>
-            ) : (
-              <video
-                controls
-                onLoadedMetadata={handleMediaLoad}
-              >
-                <source src={currentSlide.content} type="video/mp4" />
-              </video>
-            )
+            <video controls onLoadedMetadata={() => setIsLoading(false)}>
+              <source src={currentSlide.content} type="video/mp4" />
+            </video>
           ) : (
             <img
               src={currentSlide.content}
               alt="slide"
-              onLoad={handleMediaLoad}
+              onLoad={() => setIsLoading(false)}
             />
           )}
         </div>
@@ -217,14 +273,26 @@ const StoryDetailsPage = ({ story, onClose }) => {
               onClick={handleBookmarkStory}
             />
           </div>
+          <div className="story-download-container">
+            <img
+              src={isDownloaded ? DownloadDoneIcon : DownloadIcon}
+              alt="Download"
+              className="story-download-icon"
+              onClick={() => handleDownloadSlide(currentSlide._id)}
+            />
+          </div>
           <div className="story-like-container">
             <img
               src={isLiked[currentSlideIndex] ? LikedIcon : LikeIcon}
               alt="Like"
               className="story-like-icon"
-              onClick={() => handleLikeSlide(currentSlide._id, currentSlideIndex)}
+              onClick={() =>
+                handleLikeSlide(currentSlide._id, currentSlideIndex)
+              }
             />
-            <span className="story-like-count">{likesCount[currentSlideIndex]}</span>
+            <span className="story-like-count">
+              {likesCount[currentSlideIndex]}
+            </span>
           </div>
         </div>
 
@@ -240,6 +308,8 @@ const StoryDetailsPage = ({ story, onClose }) => {
           className="story-next-button"
           onClick={nextSlide}
         />
+
+        <ToastContainer />
       </div>
     </div>
   );

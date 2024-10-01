@@ -139,8 +139,13 @@
   align-items: center;
 }
 
+.story-download-container {
+  display: flex;
+  align-items: center;
+}
+
 .story-bookmark-icon,
-.story-like-icon {
+.story-like-icon, .story-download-icon {
   width: 24px;
   height: 24px;
   cursor: pointer;
@@ -170,4 +175,23 @@
 
 .story-next-button {
   right: 20%; /* Adjusted to be relative to the viewport */
+}
+
+/* Toast notifications */
+.toast-center {
+  text-align: center;
+  font-size: 14px;
+  color: red;
+}
+
+.download-toast {
+  font-size: 11px;
+  color: green;
+  text-align: center;
+}
+
+.share-toast {
+  font-size: 14px;
+  color: red;
+  text-align: center;
 }

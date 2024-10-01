@@ -37,7 +37,6 @@ button {
   transition: background-color 0.3s ease;
 }
 
-
 /* Make images responsive by default */
 img {
   max-width: 100%;
