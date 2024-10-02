@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../css/YourStoriesPage.css";
-import EditIcon from "../assets/edit.png";
+import EditIcon from "../assets/Edit.png";
 
 const YourStoriesPage = ({ isLoggedIn, openEditStory }) => {
   const [yourStories, setYourStories] = useState([]);

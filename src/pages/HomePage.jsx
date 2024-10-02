@@ -10,7 +10,7 @@ import healthImage from "../assets/medical.png";
 import travelImage from "../assets/travel.png";
 import movieImage from "../assets/world.png";
 import educationImage from "../assets/education.jpg";
-import EditIcon from "../assets/edit.png";
+import EditIcon from "../assets/Edit.png";
 
 const HomePage = ({ isLoggedIn, openEditStory }) => {
   const [selectedCategories, setSelectedCategories] = useState(["All"]);
