@@ -266,7 +266,7 @@ const HomePage = ({ isLoggedIn, openEditStory }) => {
                 )}
             </div>
           ) : (
-            <p>No stories available</p> 
+            <p>No stories available</p>
           )}
         </div>
       )}
