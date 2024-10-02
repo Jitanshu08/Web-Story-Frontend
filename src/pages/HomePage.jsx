@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom"; // Import useNavigate and useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import "../css/HomePage.css";
 
 // Import images for categories
@@ -20,8 +20,8 @@ const HomePage = ({ isLoggedIn, openEditStory }) => {
   const [visibleYourStories, setVisibleYourStories] = useState(4);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const videoRefs = useRef({});
-  const navigate = useNavigate(); // Use navigate for URL handling
-  const location = useLocation(); // Use location to track the current URL
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Handle window resize to detect mobile screen
   useEffect(() => {
@@ -29,6 +29,10 @@ const HomePage = ({ isLoggedIn, openEditStory }) => {
       setIsMobile(window.innerWidth <= 768);
     };
     window.addEventListener("resize", handleResize);
+
+    // Initial check on page load
+    setIsMobile(window.innerWidth <= 768);
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -64,6 +68,10 @@ const HomePage = ({ isLoggedIn, openEditStory }) => {
       }
     };
 
+    fetchStories();
+  }, []);
+
+  useEffect(() => {
     const fetchUserStories = async () => {
       if (isLoggedIn) {
         const token = localStorage.getItem("token");
@@ -77,10 +85,9 @@ const HomePage = ({ isLoggedIn, openEditStory }) => {
             );
             setYourStories(userStoriesResponse.data);
           } catch (error) {
-            if (error.response && error.response.status === 404) {
-              setYourStories([]);
-            } else {
-              console.error("Error fetching user stories:", error);
+            console.error("Error fetching user stories:", error);
+            if (error.response && error.response.status === 401) {
+              setYourStories([]); // Clear user stories if unauthorized
             }
           }
         }
@@ -89,9 +96,8 @@ const HomePage = ({ isLoggedIn, openEditStory }) => {
       }
     };
 
-    fetchStories();
     if (isLoggedIn) {
-      fetchUserStories();
+      fetchUserStories(); // Fetch stories only if the user is logged in
     }
   }, [isLoggedIn]);
 
@@ -172,92 +178,84 @@ const HomePage = ({ isLoggedIn, openEditStory }) => {
         ))}
       </div>
 
-      {isLoggedIn && !isMobile && (
+      {isLoggedIn && yourStories.length > 0 && !isMobile && (
         <div className="user-stories-section">
           <h2>Your Stories</h2>
-          {yourStories.length > 0 ? (
-            <div className="stories-list">
-              {yourStories.slice(0, visibleYourStories).map((story) => (
-                <div
-                  key={story._id}
-                  className="story-card"
-                  onClick={() => handleStoryClick(story)}
-                >
-                  {story.slides[0] &&
-                    (story.slides[0].type === "video" ? (
-                      isYouTubeVideo(story.slides[0].content) ? (
-                        <iframe
-                          width="100%"
-                          height="200px"
-                          src={getYouTubeEmbedUrl(story.slides[0].content)}
-                          title="YouTube video preview"
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        ></iframe>
-                      ) : (
-                        <video
-                          width="100%"
-                          height="200px"
-                          controls
-                          ref={(el) => (videoRefs.current[story._id] = el)}
-                          onTimeUpdate={handleVideoTimeUpdate}
-                        >
-                          <source
-                            src={story.slides[0].content}
-                            type="video/mp4"
-                          />
-                        </video>
-                      )
-                    ) : (
-                      <img
-                        src={story.slides[0].content}
-                        alt="slide preview"
+          <div className="stories-list">
+            {yourStories.slice(0, visibleYourStories).map((story) => (
+              <div
+                key={story._id}
+                className="story-card"
+                onClick={() => handleStoryClick(story)}
+              >
+                {story.slides[0] &&
+                  (story.slides[0].type === "video" ? (
+                    isYouTubeVideo(story.slides[0].content) ? (
+                      <iframe
                         width="100%"
                         height="200px"
-                      />
-                    ))}
-
-                  <div className="home-story-text-overlay">
-                    {story.slides[0].heading && (
-                      <h3>{story.slides[0].heading}</h3>
-                    )}
-                    {story.slides[0].description && (
-                      <p>{truncateText(story.slides[0].description, 8)}</p>
-                    )}
-                  </div>
-
-                  <button
-                    className="edit-button"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent opening story details
-                      handleEditStory(story._id);
-                    }}
-                  >
+                        src={getYouTubeEmbedUrl(story.slides[0].content)}
+                        title="YouTube video preview"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                    ) : (
+                      <video
+                        width="100%"
+                        height="200px"
+                        controls
+                        ref={(el) => (videoRefs.current[story._id] = el)}
+                        onTimeUpdate={handleVideoTimeUpdate}
+                      >
+                        <source
+                          src={story.slides[0].content}
+                          type="video/mp4"
+                        />
+                      </video>
+                    )
+                  ) : (
                     <img
-                      className="edit-button-icon"
-                      src={EditIcon}
-                      alt="Edit"
+                      src={story.slides[0].content}
+                      alt="slide preview"
+                      width="100%"
+                      height="200px"
                     />
-                    Edit
+                  ))}
+
+                <div className="home-story-text-overlay">
+                  {story.slides[0].heading && (
+                    <h3>{story.slides[0].heading}</h3>
+                  )}
+                  {story.slides[0].description && (
+                    <p>{truncateText(story.slides[0].description, 8)}</p>
+                  )}
+                </div>
+
+                <button
+                  className="edit-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditStory(story._id);
+                  }}
+                >
+                  <img className="edit-button-icon" src={EditIcon} alt="Edit" />
+                  Edit
+                </button>
+              </div>
+            ))}
+            {yourStories.length > 4 &&
+              visibleYourStories < yourStories.length && (
+                <div className="see-more-container">
+                  <button
+                    className="see-more-button"
+                    onClick={handleSeeMoreYourStories}
+                  >
+                    See More
                   </button>
                 </div>
-              ))}
-              {yourStories.length > 4 &&
-                visibleYourStories < yourStories.length && (
-                  <div className="see-more-container">
-                    <button
-                      className="see-more-button"
-                      onClick={handleSeeMoreYourStories}
-                    >
-                      See More
-                    </button>
-                  </div>
-                )}
-            </div>
-          ) : (
-            <p>No stories available</p>
-          )}
+              )}
+          </div>
         </div>
       )}
 

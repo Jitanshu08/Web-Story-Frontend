@@ -301,12 +301,14 @@ const StoryDetailsPage = ({ story: initialStory, onClose }) => {
           alt="Previous"
           className="story-previous-button"
           onClick={previousSlide}
+          disabled={currentSlideIndex === 0}
         />
         <img
           src={NextIcon}
           alt="Next"
           className="story-next-button"
           onClick={nextSlide}
+          disabled={currentSlideIndex === story.slides.length - 1} // Disable if at the last slide
         />
 
         <ToastContainer />

@@ -15,6 +15,7 @@ const Navbar = ({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+  // Fetch user info only if logged in
   useEffect(() => {
     if (loggedIn) {
       const token = localStorage.getItem("token");
@@ -35,11 +36,16 @@ const Navbar = ({
     }
   }, [loggedIn]);
 
+  // Handle window resize for mobile view detection
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
     window.addEventListener("resize", handleResize);
+
+    // Ensure correct initial check for mobile view
+    setIsMobile(window.innerWidth <= 768);
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -99,7 +105,7 @@ const Navbar = ({
       </div>
 
       {/* Hamburger Menu */}
-      {loggedIn || isMobile ? ( // Show hamburger when logged in or on mobile regardless of login status
+      {(loggedIn || isMobile) && ( // Show hamburger menu for mobile or logged in users
         <div className="hamburger-menu">
           <button className="hamburger-icon" onClick={toggleDropdown}>
             &#9776;
@@ -159,7 +165,7 @@ const Navbar = ({
             </div>
           )}
         </div>
-      ) : null}
+      )}
     </nav>
   );
 };
