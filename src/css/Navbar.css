@@ -22,7 +22,7 @@
   background-color: rgba(255, 115, 115, 1);
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 10px 25px;
   cursor: pointer;
   border-radius: 20px;
   font-size: 1rem;
@@ -30,6 +30,14 @@
 
 .navbar-button:hover {
   background-color: #d33e3e;
+}
+
+.sign-in-button {
+  background-color: rgba(115, 171, 255, 1); /* Restore blue color */
+}
+
+.sign-in-button:hover {
+  background-color: rgba(84, 145, 255, 1); /* Darker blue on hover */
 }
 
 .bookmark-button {
@@ -59,6 +67,12 @@
   align-items: center;
   justify-content: center;
   background-color: rgba(255, 115, 115, 1);
+  margin-right: 10px; 
+}
+
+.navbar-username {
+  font-size: 1rem;
+  color: black;
 }
 
 .hamburger-icon {
@@ -87,6 +101,7 @@
   z-index: 1;
   width: 200px;
   text-align: center;
+  gap: 10px;
 }
 
 .mobile-user-icon {
@@ -119,6 +134,16 @@
   background-color: #d32f2f;
 }
 
+.cross-icon {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: none; /* Hidden by default */
+}
+
 /* Media query for mobile devices */
 @media (max-width: 768px) {
   .navbar-buttons {
@@ -138,8 +163,8 @@
     position: fixed;
     top: 55px;
     left: 0;
-    width: 100%; /* Full width */
-    height: 50vh; 
+    width: 100%; 
+    height: 50vh;
     background-color: white;
     box-shadow: none; /* Remove shadow for full-screen look */
     justify-content: flex-start;
@@ -149,9 +174,27 @@
   }
 
   .dropdown-button {
-    width: 29%; /* Wider buttons in mobile */
-    margin: 10px auto; /* Center buttons with margin */
+    width: 29%;
+    margin: 10px auto;
     display: flex;
+    justify-content: center;
+  }
+
+  .cross-icon {
+    display: block;
+  }
+
+  .navbar-username {
+    display: none; /* Hide the username in the navbar for mobile */
+  }
+
+  .mobile-user-icon {
+    display: inline-block; /* Show the user icon in the mobile dropdown */
+  }
+
+  .dropdown-content p {
+    display: flex;
+    align-items: center;
     justify-content: center;
   }
 }

@@ -3,6 +3,7 @@ import "../css/Navbar.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import BookmarkIcon from "../assets/bookmark.png"; // Import the bookmark icon
+import CrossIcon from "../assets/cross1.png"; // Import the cross icon
 
 const Navbar = ({
   toggleLogin,
@@ -43,7 +44,7 @@ const Navbar = ({
     };
     window.addEventListener("resize", handleResize);
 
-    // Ensure correct initial check for mobile view
+    // initial check for mobile view
     setIsMobile(window.innerWidth <= 768);
 
     return () => window.removeEventListener("resize", handleResize);
@@ -57,6 +58,10 @@ const Navbar = ({
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
+  };
+
+  const closeDropdown = () => {
+    setDropdownOpen(false);
   };
 
   return (
@@ -84,6 +89,8 @@ const Navbar = ({
                   <button className="user-icon">
                     {username[0].toUpperCase()}
                   </button>
+                  <span className="navbar-username">{username}</span>{" "}
+                  {/* Display the username next to the user icon */}
                 </div>
               </>
             )}
@@ -93,9 +100,12 @@ const Navbar = ({
             {!isMobile && (
               <>
                 <button className="navbar-button" onClick={toggleRegister}>
-                  Register
+                  Register Now
                 </button>
-                <button className="navbar-button" onClick={toggleLogin}>
+                <button
+                  className="navbar-button sign-in-button"
+                  onClick={toggleLogin}
+                >
                   Sign In
                 </button>
               </>
@@ -112,6 +122,13 @@ const Navbar = ({
           </button>
           {dropdownOpen && (
             <div className="dropdown-content">
+              {/* Cross button for mobile to close the dropdown */}
+              <img
+                src={CrossIcon}
+                alt="Close"
+                className="cross-icon"
+                onClick={closeDropdown}
+              />
               {loggedIn && username ? (
                 <>
                   <p>

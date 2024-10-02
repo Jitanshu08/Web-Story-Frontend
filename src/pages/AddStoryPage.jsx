@@ -1,7 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "../css/AddStoryPage.css";
-import CloseIcon from "../assets/Close.png"; // Importing Close icon
+import CloseIcon from "../assets/Close.png"; 
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddStoryPage = ({ closePopup }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -14,23 +16,36 @@ const AddStoryPage = ({ closePopup }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const videoRefs = useRef([]);
 
+  // Function to get file type from URL (image, video, unknown)
   const getFileTypeFromUrl = (url) => {
     const imageExtensions = [".jpg", ".jpeg", ".png", ".gif"];
     const videoExtensions = [".mp4", ".avi", ".mov"];
-    const videoDomains = ["youtube.com", "youtu.be"];
 
     if (!url || (!url.startsWith("http") && !url.startsWith("www.")))
       return "unknown";
 
     try {
       const urlObj = new URL(url);
-      if (videoDomains.includes(urlObj.hostname)) return "video";
-      if (imageExtensions.some((ext) => url.endsWith(ext))) return "image";
       if (videoExtensions.some((ext) => url.endsWith(ext))) return "video";
+      if (imageExtensions.some((ext) => url.endsWith(ext))) return "image";
       return "unknown";
     } catch {
       return "unknown";
     }
+  };
+
+  // Function to get video duration from non-YouTube URLs
+  const getVideoDuration = async (url) => {
+    return new Promise((resolve) => {
+      const video = document.createElement("video");
+      video.src = url;
+      video.onloadedmetadata = () => {
+        resolve(video.duration);
+      };
+      video.onerror = () => {
+        resolve(null); // Return null if there is an error
+      };
+    });
   };
 
   const handleAddSlide = () => {
@@ -63,19 +78,34 @@ const AddStoryPage = ({ closePopup }) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
 
-    for (const ref of videoRefs.current) {
-      if (ref && ref.duration > 30) {
-        setError(
-          `Slide ${
-            videoRefs.current.indexOf(ref) + 1
-          } has a video longer than 30 seconds.`
-        );
-        return;
+    // Validate all slides for video duration
+    for (let slide of slides) {
+      if (slide.type === "video") {
+        const duration = await getVideoDuration(slide.content);
+        if (duration === null) {
+          setError("Failed to validate the video duration. Cannot proceed.");
+          toast.error("Failed to validate the video duration. Cannot proceed.");
+          return;
+        }
+        if (duration > 30) {
+          setError(
+            `Slide ${
+              slides.indexOf(slide) + 1
+            } has a video longer than 30 seconds.`
+          );
+          toast.error(
+            `Slide ${
+              slides.indexOf(slide) + 1
+            } has a video longer than 30 seconds.`
+          );
+          return;
+        }
       }
     }
 
     if (slides.length < 3 || slides.length > 6) {
       setError("A story must have between 3 and 6 slides.");
+      toast.error("A story must have between 3 and 6 slides.");
       return;
     }
 
@@ -95,11 +125,12 @@ const AddStoryPage = ({ closePopup }) => {
           type: "",
         },
       ]);
-
       setError("");
       setSuccessMessage("Story added successfully!");
+      toast.success("Story added successfully!");
     } catch (error) {
       setError("Failed to add story. Please try again.");
+      toast.error("Failed to add story. Please try again.");
     }
   };
 
@@ -136,20 +167,18 @@ const AddStoryPage = ({ closePopup }) => {
 
   return (
     <div className="add-story-popup">
+      <ToastContainer />
       <img
         className="close-button"
         src={CloseIcon}
         alt="Close"
         onClick={closePopup}
       />
-
-      {/* Heading for mobile users */}
       <h1 className="mobile-heading">Add story to feed</h1>
 
-      {error && <p className="error-message">{error}</p>}
-      {successMessage && <p className="success-message">{successMessage}</p>}
+      {error && <p className="error-message"></p>}
+      {successMessage && <p className="success-message"></p>}
 
-      {/* Slide navigation */}
       <div className="slides-navigation">
         {slides.map((_, index) => (
           <div
@@ -172,7 +201,6 @@ const AddStoryPage = ({ closePopup }) => {
           </div>
         ))}
 
-        {/* Conditionally render the "Add +" button */}
         {slides.length < 6 && (
           <button
             className="add-slide-button"
@@ -184,7 +212,6 @@ const AddStoryPage = ({ closePopup }) => {
         )}
       </div>
 
-      {/* Form for story content */}
       <form className="add-story-form" onSubmit={handleSubmit}>
         <div className="slide-container">
           <div className="Labels">
@@ -241,7 +268,6 @@ const AddStoryPage = ({ closePopup }) => {
           </div>
         </div>
 
-        {/* Navigation Buttons */}
         <div className="form-actions">
           <div className="Navigator">
             <button

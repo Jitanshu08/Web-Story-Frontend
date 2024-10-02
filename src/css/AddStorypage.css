@@ -173,7 +173,7 @@
   /* Stack slide navigation in a single column on the left */
   .slides-navigation {
     display: grid;
-    grid-template-columns: 1fr; /* Single column layout for slide navigation */
+    grid-template-columns: 1fr;
     gap: 10px;
     margin-bottom: 1.5rem;
     margin-top: 0;
@@ -181,7 +181,7 @@
 
   .slide-nav-item {
     display: flex;
-    justify-content: flex-start; /* Align the button to the left */
+    justify-content: flex-start; 
   }
 
   .slide-nav-item button {

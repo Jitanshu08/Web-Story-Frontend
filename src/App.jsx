@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import HomePage from "./pages/HomePage";
 import Navbar from "./components/Navbar";
@@ -16,10 +16,11 @@ function App() {
   const [showAddStory, setShowAddStory] = useState(false);
   const [showEditStory, setShowEditStory] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
+  const navigate = useNavigate(); 
+
   // Get the current location to track when to show StoryDetailsPage as a popup
   const location = useLocation();
-  const background = location.state && location.state.background;  // Tracks if we're rendering the story details as a modal
+  const background = location.state && location.state.background; // Tracks if we're rendering the story details as a modal
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -80,25 +81,35 @@ function App() {
         loggedIn={isLoggedIn}
         handleLogout={handleLogout}
       />
-      
+
       {/* Main Routes */}
-      <Routes location={background || location}> 
+      <Routes location={background || location}>
         {/* Homepage */}
         <Route
           path="/"
-          element={<HomePage isLoggedIn={isLoggedIn} openEditStory={openEditStory} />}
+          element={
+            <HomePage isLoggedIn={isLoggedIn} openEditStory={openEditStory} />
+          }
         />
 
         {/* Add Story */}
         <Route
           path="/add-story"
-          element={<HomePage isLoggedIn={isLoggedIn} openEditStory={openEditStory} />}
+          element={
+            <HomePage isLoggedIn={isLoggedIn} openEditStory={openEditStory} />
+          }
         />
 
         {/* Bookmarks */}
         <Route
           path="/bookmarks"
-          element={isLoggedIn ? <BookmarksPage /> : <HomePage isLoggedIn={isLoggedIn} openEditStory={openEditStory} />}
+          element={
+            isLoggedIn ? (
+              <BookmarksPage />
+            ) : (
+              <HomePage isLoggedIn={isLoggedIn} openEditStory={openEditStory} />
+            )
+          }
         />
 
         {/* Edit Story */}
@@ -110,14 +121,24 @@ function App() {
         {/* Your Stories */}
         <Route
           path="/your-stories"
-          element={<YourStoriesPage isLoggedIn={isLoggedIn} openEditStory={openEditStory} />}
+          element={
+            <YourStoriesPage
+              isLoggedIn={isLoggedIn}
+              openEditStory={openEditStory}
+            />
+          }
         />
 
         {/* Story Details (full page if no background) */}
         {!background && (
           <Route
             path="/stories/:id"
-            element={<StoryDetailsPage />}
+            element={
+              <StoryDetailsPage
+                onLoginTrigger={toggleLogin}
+                onClose={() => navigate("/")} // Navigates back to the homepage on close
+              />
+            }
           />
         )}
       </Routes>
@@ -127,7 +148,12 @@ function App() {
         <Routes>
           <Route
             path="/stories/:id"
-            element={<StoryDetailsPage />}
+            element={
+              <StoryDetailsPage
+                onLoginTrigger={toggleLogin}
+                onClose={() => navigate("/")} // Navigates back to the homepage on close
+              />
+            }
           />
         </Routes>
       )}
@@ -135,14 +161,20 @@ function App() {
       {/* Conditionally show the Login Popup */}
       {showLogin && (
         <div className="overlay">
-          <LoginPage closePopup={toggleLogin} onLoginSuccess={handleLoginSuccess} />
+          <LoginPage
+            closePopup={toggleLogin}
+            onLoginSuccess={handleLoginSuccess}
+          />
         </div>
       )}
 
       {/* Conditionally show the Register Popup */}
       {showRegister && (
         <div className="overlay">
-          <RegisterPage closePopup={toggleRegister} openLoginPopup={toggleLogin} />
+          <RegisterPage
+            closePopup={toggleRegister}
+            openLoginPopup={toggleLogin}
+          />
         </div>
       )}
 

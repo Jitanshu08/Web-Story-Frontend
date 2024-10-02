@@ -1,111 +1,92 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import "../css/BookmarksPage.css";
-import StoryDetailsPage from "./StoryDetailPage"; // Import the StoryDetailsPage component
+import StoryDetailsPage from "./StoryDetailPage"; 
 
 const BookmarksPage = () => {
   const [bookmarks, setBookmarks] = useState([]); // Default to an empty array
-  const [error, setError] = useState(""); // Add error state
-  const [selectedStory, setSelectedStory] = useState(null); // State for selected story
-  const videoRefs = useRef({}); // For video controls
+  const [selectedStory, setSelectedStory] = useState(null); 
+  const videoRefs = useRef({});
 
   useEffect(() => {
     const fetchBookmarks = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        setError("User not authenticated");
-        return;
+        return; // An error message can be set here
       }
 
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/stories/bookmarks`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/stories/bookmarks`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-        // Check if response data contains bookmarks
         if (response.data && response.data.length > 0) {
-          setBookmarks(response.data); // Assuming the response is an array of bookmarked stories
+          setBookmarks(response.data);
         } else {
-          setBookmarks([]); // Ensure that we have an empty array if no bookmarks
+          setBookmarks([]); // Empty state when no bookmarks
         }
       } catch (err) {
         console.error("Error fetching bookmarks:", err);
-        setError("Failed to fetch bookmarks");
       }
     };
 
     fetchBookmarks();
   }, []);
 
-  const isYouTubeVideo = (url) => {
-    return url.includes("youtube.com") || url.includes("youtu.be");
-  };
-
-  const getYouTubeEmbedUrl = (url) => {
-    if (url.includes("watch?v=")) {
-      return url.replace("watch?v=", "embed/");
-    } else if (url.includes("youtu.be/")) {
-      return url.replace("youtu.be/", "www.youtube.com/embed/");
-    }
-    return url;
-  };
-
-  const handleVideoTimeUpdate = (e) => {
-    if (e.target.currentTime >= 30) {
-      e.target.pause(); // Pause the video after 30 seconds
-    }
+  const truncateText = (text, maxWords) => {
+    if (!text) return "";
+    return text.split(" ").slice(0, maxWords).join(" ") + "...";
   };
 
   return (
     <div className="bookmarks-page">
       <h2>Your Bookmarks</h2>
-      {error && <p className="error-message">{error}</p>} {/* Display error if it exists */}
       {bookmarks.length > 0 ? (
         <div className="bookmarks-list">
           {bookmarks.map((story) => (
             <div
               key={story._id}
-              className="story-card"
+              className="bookmark-card"
               onClick={() => setSelectedStory(story)} // Open the StoryDetailsPage when clicked
             >
-              <h3>{story.title}</h3>
-              <p>Category: {story.category}</p>
-              {/* Display the first slide preview */}
               {story.slides[0] &&
                 (story.slides[0].type === "video" ? (
-                  isYouTubeVideo(story.slides[0].content) ? (
-                    <iframe
-                      width="200"
-                      height="150"
-                      src={getYouTubeEmbedUrl(story.slides[0].content)}
-                      title="YouTube video preview"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    ></iframe>
-                  ) : (
-                    <video
-                      width="200"
-                      controls
-                      ref={(el) => (videoRefs.current[story._id] = el)}
-                      onTimeUpdate={handleVideoTimeUpdate}
-                    >
-                      <source src={story.slides[0].content} type="video/mp4" />
-                    </video>
-                  )
+                  <video
+                    width="100%"
+                    height="200px"
+                    controls
+                    ref={(el) => (videoRefs.current[story._id] = el)}
+                  >
+                    <source src={story.slides[0].content} type="video/mp4" />
+                  </video>
                 ) : (
-                  <img src={story.slides[0].content} alt="slide preview" width="200" />
+                  <img
+                    src={story.slides[0].content}
+                    alt="story preview"
+                    width="100%"
+                    height="200px"
+                  />
                 ))}
+              <div className="bookmark-card-text">
+                <h3>{story.slides[0].heading}</h3>
+                <p>{truncateText(story.slides[0].description, 10)}</p>
+              </div>
             </div>
           ))}
         </div>
       ) : (
-        !error && <p>No bookmarks yet.</p> // Only show "No bookmarks" if there's no error
+        <p>No bookmarks available</p> 
       )}
 
       {/* StoryDetailsPage Popup */}
       {selectedStory && (
-        <StoryDetailsPage story={selectedStory} onClose={() => setSelectedStory(null)} />
+        <StoryDetailsPage
+          story={selectedStory}
+          onClose={() => setSelectedStory(null)} 
+        />
       )}
     </div>
   );

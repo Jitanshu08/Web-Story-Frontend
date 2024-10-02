@@ -1,23 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
-import "../css/AddStoryPage.css"; // Reuse the same CSS as AddStoryPage
-import CloseIcon from "../assets/Close.png"; // Importing Close icon
+import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "../css/AddStoryPage.css";
+import CloseIcon from "../assets/Close.png";
 
 const EditStoryPage = ({ closePopup, storyId }) => {
- 
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [slides, setSlides] = useState([]);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const videoRefs = useRef([]); // To store video refs for duration checking
 
   useEffect(() => {
     const fetchStoryDetails = async () => {
       const token = localStorage.getItem("token");
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/api/stories/stories/${storyId}`,
+          `${import.meta.env.VITE_API_BASE_URL}/api/stories/${storyId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -25,10 +25,10 @@ const EditStoryPage = ({ closePopup, storyId }) => {
         const story = response.data;
         setSlides(story.slides); // Set slides data
       } catch (error) {
-        setError("Failed to load story details.");
+        toast.error("Failed to load story details.");
       }
     };
-    if (storyId) {  // Ensure storyId is valid
+    if (storyId) {
       fetchStoryDetails();
     }
   }, [storyId]);
@@ -59,22 +59,55 @@ const EditStoryPage = ({ closePopup, storyId }) => {
     }
   };
 
+  // Function to get video duration for non-YouTube videos
+  const getVideoDuration = async (url) => {
+    return new Promise((resolve) => {
+      const video = document.createElement("video");
+      video.src = url;
+      video.onloadedmetadata = () => {
+        resolve(video.duration);
+      };
+      video.onerror = () => {
+        resolve(null);
+      };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
 
+    // Check video duration
+    for (let slide of slides) {
+      if (slide.type === "video") {
+        const duration = await getVideoDuration(slide.content);
+        if (duration === null) {
+          toast.error("Failed to validate the video duration. Cannot proceed.");
+          return;
+        }
+        if (duration > 30) {
+          toast.error(
+            `Slide ${
+              slides.indexOf(slide) + 1
+            } has a video longer than 30 seconds.`
+          );
+          return;
+        }
+      }
+    }
+
     try {
       await axios.put(
-        `${import.meta.env.VITE_API_BASE_URL}/api/stories/edit/${id}`,
-        { slides }, // Save the updated slides with the correct heading field
+        `${import.meta.env.VITE_API_BASE_URL}/api/stories/edit/${storyId}`,
+        { slides },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setSuccessMessage("Story updated successfully!");
-      closePopup(); // Close the popup on success
-      navigate("/"); // Redirect to homepage after successful update
+      toast.success("Story updated successfully!");
+      closePopup();
+      navigate("/");
     } catch (error) {
-      setError("Failed to update story. Please try again.");
+      toast.error("Failed to update story. Please try again.");
     }
   };
 
@@ -104,6 +137,7 @@ const EditStoryPage = ({ closePopup, storyId }) => {
 
   return (
     <div className="add-story-popup">
+      <ToastContainer />
       <img
         className="close-button"
         src={CloseIcon}
@@ -111,9 +145,6 @@ const EditStoryPage = ({ closePopup, storyId }) => {
         onClick={closePopup}
       />
       <h1 className="mobile-heading">Edit Story</h1>
-
-      {error && <p className="error-message">{error}</p>}
-      {successMessage && <p className="success-message">{successMessage}</p>}
       {/* Slide navigation */}
       <div className="slides-navigation">
         {slides.map((_, index) => (
@@ -137,7 +168,6 @@ const EditStoryPage = ({ closePopup, storyId }) => {
           </div>
         ))}
 
-        {/* Conditionally render the "Add +" button */}
         {slides.length < 6 && (
           <button
             className="add-slide-button"
@@ -148,9 +178,8 @@ const EditStoryPage = ({ closePopup, storyId }) => {
           </button>
         )}
       </div>
-
       {/* Form for editing story content */}
-      <form className="add-story-form" onSubmit={(e) => handleSubmit(e)}>
+      <form className="add-story-form" onSubmit={handleSubmit}>
         <div className="slide-container">
           <div className="Labels">
             <label>Heading:</label>

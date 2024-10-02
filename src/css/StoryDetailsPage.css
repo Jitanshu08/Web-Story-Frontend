@@ -5,11 +5,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.9); /* Dark semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.9);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Ensure it's on top of everything */
+  z-index: 1000;
 }
 
 /* Centered popup content with media */
@@ -23,7 +23,8 @@
   flex-direction: column;
   justify-content: space-between;
   background-color: black;
-  z-index: 10; /* Ensure it's above other elements */
+  z-index: 10; /* Ensuring it's above other elements */
+  box-shadow: 0px 0px 45px 4px rgb(255 255 255 / 25%);
 }
 
 /* Header icons (cross and send icon) */
@@ -80,7 +81,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 100px; /* Added margin for spacing */
+  margin-top: 100px; 
 }
 
 .story-media-container img,
@@ -145,7 +146,8 @@
 }
 
 .story-bookmark-icon,
-.story-like-icon, .story-download-icon {
+.story-like-icon,
+.story-download-icon {
   width: 24px;
   height: 24px;
   cursor: pointer;
@@ -164,9 +166,9 @@
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  width: 40px; /* Increased button size */
+  width: 40px; 
   height: 60px;
-  z-index: 101; /* Ensure buttons are above content */
+  z-index: 101; /* Ensuring buttons are above content */
 }
 
 .story-previous-button {

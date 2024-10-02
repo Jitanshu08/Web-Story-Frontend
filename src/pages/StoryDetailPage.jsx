@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom"; // Use useParams to get the story ID from the URL
+import { useParams } from "react-router-dom";
 import "../css/StoryDetailsPage.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -16,19 +16,18 @@ import LikedIcon from "../assets/liked.png";
 import DownloadIcon from "../assets/download.png";
 import DownloadDoneIcon from "../assets/download_done.png";
 
-const StoryDetailsPage = ({ story: initialStory, onClose }) => {
-  const [story, setStory] = useState(initialStory || null); // Initialize story state
+const StoryDetailsPage = ({ story: initialStory, onClose, onLoginTrigger }) => {
+  const [story, setStory] = useState(initialStory || null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [likesCount, setLikesCount] = useState([]);
   const [isLiked, setIsLiked] = useState([]);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloaded, setIsDownloaded] = useState(false);
+  const timerRef = useRef(null); // To hold the reference to the timer
 
   const { id } = useParams();
-  const navigate = useNavigate();
 
-  // Fetch story if not provided as a prop
   useEffect(() => {
     if (!story) {
       const fetchStory = async () => {
@@ -45,7 +44,6 @@ const StoryDetailsPage = ({ story: initialStory, onClose }) => {
         } catch (error) {
           console.error("Error fetching story:", error);
           setIsLoading(false);
-          // Handle case when story is not found
           if (error.response && error.response.status === 404) {
             toast.error("Story not found", {
               position: "top-center",
@@ -56,7 +54,6 @@ const StoryDetailsPage = ({ story: initialStory, onClose }) => {
           }
         }
       };
-
       fetchStory();
     } else {
       setIsLoading(false);
@@ -64,15 +61,16 @@ const StoryDetailsPage = ({ story: initialStory, onClose }) => {
       setIsLiked(story.slides.map(() => false));
     }
     return () => {
-      setIsLoading(false); // Cleanup to reset loading state when component unmounts
+      setIsLoading(false);
     };
   }, [id, story]);
 
-  // Bookmark check effect
   useEffect(() => {
     if (story) {
       const checkBookmarkStatus = async () => {
         const token = localStorage.getItem("token");
+        if (!token) return;
+
         try {
           const response = await axios.get(
             `${import.meta.env.VITE_API_BASE_URL}/api/stories/bookmarks`,
@@ -96,17 +94,59 @@ const StoryDetailsPage = ({ story: initialStory, onClose }) => {
   }, [story]);
 
   const nextSlide = () => {
-    setCurrentSlideIndex((prev) =>
-      prev < story.slides.length - 1 ? prev + 1 : prev
-    );
+    if (story && currentSlideIndex < story.slides.length - 1) {
+      setCurrentSlideIndex((prev) => prev + 1);
+    }
   };
 
   const previousSlide = () => {
-    setCurrentSlideIndex((prev) => (prev > 0 ? prev - 1 : prev));
+    if (story && currentSlideIndex > 0) {
+      setCurrentSlideIndex((prev) => prev - 1);
+    }
+  };
+
+  const resetTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    if (story && story.slides) {
+      timerRef.current = setTimeout(nextSlide, 40000); // Automatically move to next slide after 40 seconds
+    }
+  };
+
+  useEffect(() => {
+    resetTimer(); // Reset the timer when the component mounts or when the slide index changes
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current); // Clean up the timer on unmount or slide change
+      }
+    };
+  }, [currentSlideIndex, story]);
+
+  const triggerLogin = () => {
+    if (onClose) {
+      onClose(); // Ensuring the modal closes before showing the login modal
+    }
+
+    setTimeout(() => {
+      toast.error("Please log in to perform this action", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        className: "error-toast",
+      });
+      onLoginTrigger(); // Trigger the login modal after a delay
+    }, 300);
   };
 
   const handleLikeSlide = async (slideId, index) => {
     const token = localStorage.getItem("token");
+    if (!token) {
+      triggerLogin();
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/stories/like/${
@@ -134,6 +174,11 @@ const StoryDetailsPage = ({ story: initialStory, onClose }) => {
 
   const handleBookmarkStory = async () => {
     const token = localStorage.getItem("token");
+    if (!token) {
+      triggerLogin();
+      return;
+    }
+
     try {
       await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/stories/bookmark/${
@@ -199,16 +244,13 @@ const StoryDetailsPage = ({ story: initialStory, onClose }) => {
       });
     }
   };
+
   const handleClose = () => {
-    setIsLoading(false);
     if (onClose) {
-      onClose();
-    } else {
-      navigate("/");
+      onClose(); // Trigger the onClose prop to navigate back
     }
   };
 
-  // If story is not yet loaded, show a loading message
   if (isLoading || !story) {
     return <div>Loading...</div>;
   }
@@ -308,7 +350,7 @@ const StoryDetailsPage = ({ story: initialStory, onClose }) => {
           alt="Next"
           className="story-next-button"
           onClick={nextSlide}
-          disabled={currentSlideIndex === story.slides.length - 1} // Disable if at the last slide
+          disabled={currentSlideIndex >= story.slides.length - 1}
         />
 
         <ToastContainer />
