@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+
 /* Reset some default browser styles */
 * {
   margin: 0;
@@ -8,7 +10,7 @@
 html,
 body {
   height: 100%;
-  font-family: Arial, sans-serif;
+  font-family: 'DM Sans', sans-serif;
 }
 
 /* Set default font size and background color */
@@ -35,6 +37,7 @@ button {
   border-radius: 4px;
   font-size: 1rem;
   transition: background-color 0.3s ease;
+  font-family: 'DM Sans', sans-serif;
 }
 
 /* Make images responsive by default */
@@ -77,6 +80,7 @@ h5,
 h6 {
   margin-bottom: 1rem;
   color: #333;
+  font-family: 'DM Sans', sans-serif;
 }
 
 /* Default layout for flex containers */
@@ -107,6 +111,7 @@ h6 {
   max-width: 90%;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   z-index: 101;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .close-button:hover {
@@ -114,7 +119,8 @@ h6 {
 }
 /* Make the navbar also dark when the popup is active */
 .navbar {
-  z-index: 50; /* Ensures it remains under the popup */
+  z-index: 50;
+  font-family: 'DM Sans', sans-serif;
 }
 
 /* Responsive media queries */

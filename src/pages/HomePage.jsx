@@ -86,13 +86,17 @@ const HomePage = ({ isLoggedIn, openEditStory }) => {
             setYourStories(userStoriesResponse.data);
           } catch (error) {
             console.error("Error fetching user stories:", error);
-            if (error.response && error.response.status === 401) {
-              setYourStories([]); // Clear user stories if unauthorized
+            if (error.response && error.response.status === 404) {
+              // If the user has no stories (404), clear the stories
+              setYourStories([]);
+            } else if (error.response && error.response.status === 401) {
+              // Clear stories if unauthorized
+              setYourStories([]);
             }
           }
         }
       } else {
-        setYourStories([]);
+        setYourStories([]); // Clear stories if not logged in
       }
     };
 
@@ -178,84 +182,92 @@ const HomePage = ({ isLoggedIn, openEditStory }) => {
         ))}
       </div>
 
-      {isLoggedIn && yourStories.length > 0 && !isMobile && (
+      {isLoggedIn && !isMobile && (
         <div className="user-stories-section">
           <h2>Your Stories</h2>
-          <div className="stories-list">
-            {yourStories.slice(0, visibleYourStories).map((story) => (
-              <div
-                key={story._id}
-                className="story-card"
-                onClick={() => handleStoryClick(story)}
-              >
-                {story.slides[0] &&
-                  (story.slides[0].type === "video" ? (
-                    isYouTubeVideo(story.slides[0].content) ? (
-                      <iframe
-                        width="100%"
-                        height="200px"
-                        src={getYouTubeEmbedUrl(story.slides[0].content)}
-                        title="YouTube video preview"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
-                    ) : (
-                      <video
-                        width="100%"
-                        height="200px"
-                        controls
-                        ref={(el) => (videoRefs.current[story._id] = el)}
-                        onTimeUpdate={handleVideoTimeUpdate}
-                      >
-                        <source
-                          src={story.slides[0].content}
-                          type="video/mp4"
-                        />
-                      </video>
-                    )
-                  ) : (
-                    <img
-                      src={story.slides[0].content}
-                      alt="slide preview"
-                      width="100%"
-                      height="200px"
-                    />
-                  ))}
-
-                <div className="home-story-text-overlay">
-                  {story.slides[0].heading && (
-                    <h3>{story.slides[0].heading}</h3>
-                  )}
-                  {story.slides[0].description && (
-                    <p>{truncateText(story.slides[0].description, 8)}</p>
-                  )}
-                </div>
-
-                <button
-                  className="edit-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEditStory(story._id);
-                  }}
+          {yourStories.length > 0 ? (
+            <div className="stories-list">
+              {yourStories.slice(0, visibleYourStories).map((story) => (
+                <div
+                  key={story._id}
+                  className="story-card"
+                  onClick={() => handleStoryClick(story)}
                 >
-                  <img className="edit-button-icon" src={EditIcon} alt="Edit" />
-                  Edit
-                </button>
-              </div>
-            ))}
-            {yourStories.length > 4 &&
-              visibleYourStories < yourStories.length && (
-                <div className="see-more-container">
+                  {story.slides[0] &&
+                    (story.slides[0].type === "video" ? (
+                      isYouTubeVideo(story.slides[0].content) ? (
+                        <iframe
+                          width="100%"
+                          height="200px"
+                          src={getYouTubeEmbedUrl(story.slides[0].content)}
+                          title="YouTube video preview"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      ) : (
+                        <video
+                          width="100%"
+                          height="200px"
+                          controls
+                          ref={(el) => (videoRefs.current[story._id] = el)}
+                          onTimeUpdate={handleVideoTimeUpdate}
+                        >
+                          <source
+                            src={story.slides[0].content}
+                            type="video/mp4"
+                          />
+                        </video>
+                      )
+                    ) : (
+                      <img
+                        src={story.slides[0].content}
+                        alt="slide preview"
+                        width="100%"
+                        height="200px"
+                      />
+                    ))}
+
+                  <div className="home-story-text-overlay">
+                    {story.slides[0].heading && (
+                      <h3>{story.slides[0].heading}</h3>
+                    )}
+                    {story.slides[0].description && (
+                      <p>{truncateText(story.slides[0].description, 8)}</p>
+                    )}
+                  </div>
+
                   <button
-                    className="see-more-button"
-                    onClick={handleSeeMoreYourStories}
+                    className="edit-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditStory(story._id);
+                    }}
                   >
-                    See More
+                    <img
+                      className="edit-button-icon"
+                      src={EditIcon}
+                      alt="Edit"
+                    />
+                    Edit
                   </button>
                 </div>
-              )}
-          </div>
+              ))}
+              {yourStories.length > 4 &&
+                visibleYourStories < yourStories.length && (
+                  <div className="see-more-container">
+                    <button
+                      className="see-more-button"
+                      onClick={handleSeeMoreYourStories}
+                    >
+                      See More
+                    </button>
+                  </div>
+                )}
+            </div>
+          ) : (
+            <p>No stories available</p> 
+          )}
         </div>
       )}
 
