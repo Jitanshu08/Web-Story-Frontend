@@ -16,7 +16,7 @@ function App() {
   const [showAddStory, setShowAddStory] = useState(false);
   const [showEditStory, setShowEditStory] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   // Get the current location to track when to show StoryDetailsPage as a popup
   const location = useLocation();
